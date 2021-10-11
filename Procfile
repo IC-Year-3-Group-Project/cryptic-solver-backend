@@ -1,0 +1,1 @@
+web: gunicorn reallysmartfoodapp.wsgi --log-file -
