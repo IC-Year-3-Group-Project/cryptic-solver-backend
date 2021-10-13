@@ -1,6 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from helper import *
 import requests
 
 def option_response():
@@ -46,17 +47,7 @@ def solve_with_pattern(request):
 
         return JsonResponse(matching(pattern, responses), safe=False)
 
-def matching(pattern, responses):
-    result = []
-    for response in responses:
-        match = True
-        for k,v in pattern.items():
-            if (response[k] != v):
-                match = False
-                break
-        if (match):
-            result.append(response)
-    return result
+
 
             
 
