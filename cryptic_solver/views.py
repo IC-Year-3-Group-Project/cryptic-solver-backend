@@ -1,7 +1,7 @@
 import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from helper import *
+from cryptic_solver.helper import *
 import requests
 
 def option_response():

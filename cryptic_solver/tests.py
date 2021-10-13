@@ -1,4 +1,4 @@
-from helper import matching
+from cryptic_solver.helper import matching
 import unittest
 
 class MatchingTests(unittest.TestCase):
