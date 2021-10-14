@@ -27,7 +27,7 @@ def solve_clue(request):
     if request.method == 'OPTIONS':
         return option_response()
     else:
-        data = request.json()
+        data = json.loads(request.body)
         clue = data['clue']
         word_length = data['word_length']
         responses = hs_solve_clue(clue, word_length)
@@ -47,8 +47,13 @@ def solve_with_pattern(request):
     if request.method == 'OPTIONS':
         return option_response()
     else:
-        responses = requests.post("endpoint", data = request)
-        pattern = json.loads(request.body)['pattern']
+        data = json.loads(request.body)
+        clue = data['clue']
+        word_length = data['word_length']
+        pattern = data['pattern']
+
+        responses = hs_solve_with_pattern(clue, word_length, pattern)
+
 
         return JsonResponse(matching(pattern, responses), safe=False)
 

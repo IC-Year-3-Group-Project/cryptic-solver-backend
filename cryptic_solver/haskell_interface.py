@@ -25,6 +25,16 @@ def hs_solve_with_answer(clue, solutionLength, answer):
     print(unlist(r.text))
     return r
 
+def hs_solve_with_pattern(clue, solutionLength, pattern):
+    clue = urllib.parse.quote(clue, safe='')
+
+    fullURL = f"{haskellURL}/solveAll/{clue}/{solutionLength}"
+
+    r = requests.get(url=fullURL)
+
+    print(unlist(r.text))
+    return r
+
 
 def unlist(response):
     return response[2:-2]
