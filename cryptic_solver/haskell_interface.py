@@ -3,6 +3,7 @@ import urllib.parse
 
 haskellURL = "http://84.238.224.41:5001"
 
+# calls out to the Haskell server and returns
 def hs_solve_clue(clue, solutionLength):
     clue = urllib.parse.quote(clue, safe='')
 
