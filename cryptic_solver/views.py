@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.helper import *
 import requests
+import haskell_interface
 
 def option_response():
     response = JsonResponse({})
@@ -25,10 +26,13 @@ def solve_clue(request):
     if request.method == 'OPTIONS':
         return option_response()
     else:
-        responses = requests.post("endpoint", data = request)
+        data = request.json()
+        clue = data['clue']
+        word_length = data['word_length']
+        responses = solve_clue(clue, word_length)
 
         return JsonResponse(responses, safe=False)
-        
+
 """
 {
     (String) 'clue'
@@ -49,5 +53,5 @@ def solve_with_pattern(request):
 
 
 
-            
+
 

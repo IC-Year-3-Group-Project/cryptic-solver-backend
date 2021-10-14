@@ -3,7 +3,7 @@ import urllib.parse
 
 haskellURL = "http://84.238.224.41:5001"
 
-def solveClue(clue, solutionLength):
+def hs_solve_clue(clue, solutionLength):
     clue = urllib.parse.quote(clue, safe='')
 
     fullURL = f"{haskellURL}/solve/{clue}/{solutionLength}"
@@ -12,9 +12,9 @@ def solveClue(clue, solutionLength):
 
 
     print(unlist(r.text))
-    return unlist(r.text)
+    return r
 
-def solveWithAnswer(clue, solutionLength, answer):
+def hs_solve_with_answer(clue, solutionLength, answer):
     clue = urllib.parse.quote(clue, safe='')
 
     fullURL = f"{haskellURL}/solveWithAnswer/{clue}/{solutionLength}/{answer}"
@@ -22,13 +22,13 @@ def solveWithAnswer(clue, solutionLength, answer):
     r = requests.get(url=fullURL)
 
     print(unlist(r.text))
-    return unlist(r.text)
+    return r
 
 
 def unlist(response):
     return response[2:-2]
 
 if __name__ == "__main__":
-    solveClue("Peeling paint, profit slack, upset, in a state", 10)
-    solveClue("Following kick-off, running back for corner", 4)
-    solveWithAnswer("Peeling paint, profit slack, upset, in a state", 10, "california")
+    hs_solve_clue("Peeling paint, profit slack, upset, in a state", 10)
+    hs_solve_clue("Following kick-off, running back for corner", 4)
+    hs_solve_with_answer("Peeling paint, profit slack, upset, in a state", 10, "california")
