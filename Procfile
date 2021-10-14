@@ -1,1 +1,1 @@
-web: gunicorn reallysmartfoodapp.wsgi --log-file -
+web: daphene cryptic_solver_project.asgi:application
