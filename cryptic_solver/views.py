@@ -2,8 +2,9 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.helper import *
+from cryptic_solver.haskell_interface import *
 import requests
-import haskell_interface
+
 
 def option_response():
     response = JsonResponse({})
