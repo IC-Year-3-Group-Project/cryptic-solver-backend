@@ -30,7 +30,7 @@ def solve_clue(request):
         data = request.json()
         clue = data['clue']
         word_length = data['word_length']
-        responses = solve_clue(clue, word_length)
+        responses = hs_solve_clue(clue, word_length)
 
         return JsonResponse(responses, safe=False)
 
