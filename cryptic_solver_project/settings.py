@@ -28,7 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     "127.0.0.1",
-    "localhost"
+    "localhost",
+    "https://cryptic-solver-backend.herokuapp.com"
 ]
 
 # Application definition
