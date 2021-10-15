@@ -34,9 +34,12 @@ def solve_clue(request):
         data = json.loads(request.body)
         clue = data['clue']
         word_length = data['word_length']
-        responses = hs_solve_clue(clue, word_length)
+        response = hs_solve_clue(clue, word_length)
 
-        return JsonResponse(responses, safe=False)
+        solution = makeList(response.text)
+
+        #TODO: need to check what sort of data is actually required in the response
+        return JsonResponse(solution, safe=False)
 
 """
 {
@@ -56,10 +59,11 @@ def solve_with_pattern(request):
         word_length = data['word_length']
         pattern = data['pattern']
 
-        responses = hs_solve_with_pattern(clue, word_length, pattern)
+        response = hs_solve_with_pattern(clue, word_length, pattern)
 
+        solutions = makeList(response.text)
 
-        return JsonResponse(matching(pattern, responses), safe=False)
+        return JsonResponse(matching(pattern, solutions), safe=False)
 
 """
 {

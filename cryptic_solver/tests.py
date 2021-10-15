@@ -1,4 +1,4 @@
-from cryptic_solver.helper import matching
+from cryptic_solver.helper import *
 import unittest
 
 class MatchingTests(unittest.TestCase):
@@ -15,7 +15,20 @@ class MatchingTests(unittest.TestCase):
 
         self.assertEqual(matching(pattern, list), ['BABIED', 'BABIES'])
 
+
+class MakeListTests(unittest.TestCase):
+    def testWithOneSolution(self):
+        text = "[AVERAGE]"
+
+        self.assertEqual(makeList(text), ["AVERAGE"])
+
+
+    def testWithManySolutions(self):
+        text = "['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY']"
+
+        self.assertEqual(makeList(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
+
 if __name__ == '__main__':
     unittest.main()
-    
+
 # Create your tests here.

@@ -9,3 +9,9 @@ def matching(pattern, responses):
         if (match):
             result.append(response)
     return result
+
+def makeList(text):
+    text = text.translate({ord(i): None for i in '[]\"\' '})
+    return text.split(',')
+
+#getFromList("[california, mem, weewooweewoo]")
