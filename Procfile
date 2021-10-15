@@ -1,1 +1,1 @@
-web: daphene cryptic_solver_project.asgi:application
+web: daphne cryptic_solver_project.asgi:application
