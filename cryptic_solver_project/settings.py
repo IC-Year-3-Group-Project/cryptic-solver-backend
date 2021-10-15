@@ -27,6 +27,7 @@ SECRET_KEY = 'django-insecure-1b3t$cyhxcmb+26n#3#@e&rj)q1y((0ll+frv$j7#ny@w%+3wy
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    "0.0.0.0",
     "127.0.0.1",
     "localhost",
     "https://cryptic-solver-backend.herokuapp.com"
