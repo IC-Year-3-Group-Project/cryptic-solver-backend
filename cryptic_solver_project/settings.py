@@ -30,7 +30,7 @@ ALLOWED_HOSTS = [
     "0.0.0.0",
     "127.0.0.1",
     "localhost",
-    "https://cryptic-solver-backend.herokuapp.com"
+    "cryptic-solver-backend.herokuapp.com"
 ]
 
 # Application definition
