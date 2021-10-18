@@ -5,6 +5,6 @@ urlpatterns = [
     path('solve-clue', solve_clue),
     path('solve-with-pattern', solve_with_pattern),
     path('fetch-crossword', fetch_crossword),
-    path('solve-with-dict', solve_with_dict)
-]   
-
+    path('solve-with-dict', solve_with_dict),
+    path('fetch-everyman', fetch_everyman)
+]
