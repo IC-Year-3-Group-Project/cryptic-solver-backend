@@ -1,6 +1,10 @@
 import json
 from django.http import JsonResponse
-from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
+from django.http.response import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseServerError,
+)
 from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
@@ -8,16 +12,20 @@ import requests
 import re
 import html
 
+from bs4 import BeautifulSoup
+
 allowed_crossword_prefixes = ["https://www.theguardian.com/crosswords/everyman"]
+
 
 def option_response():
     response = JsonResponse({})
     response.status_code = 204
-    response['Connection'] = 'keep-alive'
-    response['Access-Control-Allow-Origin'] = '*'
-    response['Access-Control-Allow-Methods'] = 'OPTIONS, POST'
-    response['Access-Control-Max-Age'] = 86400
+    response["Connection"] = "keep-alive"
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "OPTIONS, POST"
+    response["Access-Control-Max-Age"] = 86400
     return response
+
 
 """
 {
@@ -26,20 +34,22 @@ def option_response():
 }
 """
 
+
 @csrf_exempt
 def solve_clue(request):
-    if request.method == 'OPTIONS':
+    if request.method == "OPTIONS":
         return option_response()
     else:
         data = json.loads(request.body)
-        clue = data['clue']
-        word_length = data['word_length']
+        clue = data["clue"]
+        word_length = data["word_length"]
         response = hs_solve_clue(clue, word_length)
 
         solution = makeList(response.text)
 
-        #TODO: need to check what sort of data is actually required in the response
+        # TODO: need to check what sort of data is actually required in the response
         return JsonResponse(solution, safe=False)
+
 
 """
 {
@@ -49,15 +59,16 @@ def solve_clue(request):
 }
 """
 
+
 @csrf_exempt
 def solve_with_pattern(request):
-    if request.method == 'OPTIONS':
+    if request.method == "OPTIONS":
         return option_response()
     else:
         data = json.loads(request.body)
-        clue = data['clue']
-        word_length = data['word_length']
-        pattern = data['pattern']
+        clue = data["clue"]
+        word_length = data["word_length"]
+        pattern = data["pattern"]
 
         response = hs_solve_with_pattern(clue, word_length, pattern)
 
@@ -65,15 +76,17 @@ def solve_with_pattern(request):
 
         return JsonResponse(matching(pattern, solutions), safe=False)
 
+
 """
 {
     (String) 'url'
 }
 """
 
+
 @csrf_exempt
 def fetch_crossword(request):
-    if request.method == 'OPTIONS':
+    if request.method == "OPTIONS":
         return option_response()
     else:
         data = json.loads(request.body)
@@ -83,9 +96,33 @@ def fetch_crossword(request):
             return HttpResponseBadRequest("Invalid crossword url.")
 
         response = requests.get(url)
-        match = re.search("data\-crossword\-data=\"(.*)\"", response.text)
+        match = re.search('data\-crossword\-data="(.*)"', response.text)
         if match:
             json_crossword = html.unescape(match.groups()[0])
             return HttpResponse(json_crossword, content_type="application/json")
         else:
             return HttpResponseServerError("Failed to fetch crossword data.")
+
+
+@csrf_exempt
+def fetch_everyman(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        url = "https://www.theguardian.com/crosswords/series/everyman"
+        reqs = requests.get(url)
+        soup = BeautifulSoup(reqs.text, "html.parser")
+
+        # Use set to avoid returning duplicate links
+        urls = set()
+        #  Filter throuhg for everyman crossword links
+        for link in soup.find_all("a"):
+            l = link.get("href")
+            if (
+                link.has_attr("href")
+                and "https://www.theguardian.com/crosswords/everyman/" in l
+            ):
+                urls.add(l)
+
+        print(urls)
+        return JsonResponse({"urls": list(urls)})
