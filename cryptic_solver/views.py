@@ -1,5 +1,6 @@
 import json
 from django.http import JsonResponse
+from django.http import response
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.helper import *
@@ -89,3 +90,31 @@ def fetch_crossword(request):
             return HttpResponse(json_crossword, content_type="application/json")
         else:
             return HttpResponseServerError("Failed to fetch crossword data.")
+"""
+{
+  "word_length": 7,
+  "pattern": {"0": "a", "1": "v"},
+  "clue": " "
+}
+"""
+
+@csrf_exempt
+def solve_with_dict(request):
+    if request.method == 'OPTIONS':
+        return option_response()
+    else:
+
+        pattern = json.loads(request.body)['pattern']
+        word_length = json.loads(request.body)['word_length']
+        clue = json.loads(request.body)['clue']
+
+        cands = getCandidates(pattern, word_length)
+
+        response = hs_solve_with_cands(clue, cands)
+
+        solutions = makeList(response.text)
+
+        return JsonResponse(solutions, safe=False)
+
+
+

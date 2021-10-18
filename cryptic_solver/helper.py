@@ -1,9 +1,25 @@
+import json
+
+english_dict = {}
+
+def load_words():
+    dict = {}
+    with open('cryptic_solver/words_alpha.txt') as word_file:
+        for w in word_file.read().split():
+            length = len(w)
+            res = dict.get(length)
+            if (res == None):
+                dict.update({length: [w]})
+            else:
+                res.append(w) 
+    return dict.copy()
+
 def matching(pattern, responses):
     result = []
     for response in responses:
         match = True
         for k,v in pattern.items():
-            if (response[k] != v):
+            if (response[int(k)] != v):
                 match = False
                 break
         if (match):
@@ -15,3 +31,10 @@ def makeList(text):
     return text.split(',')
 
 #getFromList("[california, mem, weewooweewoo]")
+
+def getCandidates(pattern, word_length):
+    global english_dict
+    if english_dict == {}:
+        english_dict = load_words()
+    return matching(pattern, english_dict.get(word_length))
+    
