@@ -58,9 +58,18 @@ def hs_solve_with_pattern(clue, solutionLength, pattern):
     print(unlist(r.text))
     return r
 
-def hs_solve_with_cands(clue, candidates):
+def hs_solve_with_cands(clue, word_length, candidates):
+    clue = urllib.parse.quote(clue, safe='')
 
-    return None
+    cand_string = candidates.reduce(lambda a, b: a + "," + b)
+
+    fullURL = f"{haskellURL}/solveWithAnswers/{clue}/{word_length}/{cand_string}"
+
+    r = requests.get(url=fullURL)
+
+    print(unlist(r.text))
+    return r
+
 
 # helper function to strip the [""] surrounding the response text
 def unlist(response):
