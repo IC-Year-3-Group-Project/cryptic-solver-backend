@@ -58,6 +58,9 @@ def hs_solve_with_pattern(clue, solutionLength, pattern):
     print(unlist(r.text))
     return r
 
+def hs_solve_with_cands(clue, candidates):
+
+    return None
 
 # helper function to strip the [""] surrounding the response text
 def unlist(response):
