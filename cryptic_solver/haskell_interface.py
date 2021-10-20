@@ -18,6 +18,10 @@ Arguments:
 
 (dict)   pattern
 
+(solve_with_cands)
+
+(String) candidates - comma-separated candidate solutions based on known letters
+
 
 Returns:
 
@@ -45,7 +49,6 @@ def hs_solve_with_answer(clue, solutionLength, answer):
 
     r = requests.get(url=fullURL)
 
-    print(unlist(r.text))
     return r
 
 def hs_solve_with_pattern(clue, solutionLength, pattern):
@@ -55,7 +58,6 @@ def hs_solve_with_pattern(clue, solutionLength, pattern):
 
     r = requests.get(url=fullURL)
 
-    print(unlist(r.text))
     return r
 
 def hs_solve_with_cands(clue, word_length, candidates):
@@ -67,17 +69,4 @@ def hs_solve_with_cands(clue, word_length, candidates):
 
     r = requests.get(url=fullURL)
 
-    print(unlist(r.text))
     return r
-
-
-# helper function to strip the [""] surrounding the response text
-def unlist(response):
-    return response[2:-2]
-
-"""
-if __name__ == "__main__":
-    hs_solve_clue("Peeling paint, profit slack, upset, in a state", 10)
-    hs_solve_clue("Following kick-off, running back for corner", 4)
-    hs_solve_with_answer("Peeling paint, profit slack, upset, in a state", 10, "california")
-"""
