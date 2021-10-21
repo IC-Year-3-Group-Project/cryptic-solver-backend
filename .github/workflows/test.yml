@@ -9,12 +9,13 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    env:
+      haskell_url: ${{secrets.HASKELL_URL}}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x' 
-          haskell_url: ${{secrets.HASKELL_URL}}
       - run: pip install -r requirements.txt
       - run: python manage.py migrate
       - run: python manage.py test
