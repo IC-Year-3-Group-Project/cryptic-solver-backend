@@ -1,17 +1,14 @@
 import requests
 import urllib.parse
-"""
+
 import os
 import dotenv
 
-dotenv_file = os.path.join(BASE_DIR, ".env")
+dotenv_file = os.path.join("..", ".env")
 if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
 
 haskellURL = os.environ['HASKELL_URL']
-"""
-
-haskellURL = "http://84.238.224.41:5001"
 
 """
 
