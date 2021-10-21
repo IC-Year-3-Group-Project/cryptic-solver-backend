@@ -1,14 +1,16 @@
 import requests
 import urllib.parse
+from cryptic_solver_project import settings
 
-haskellURL = "http://84.238.224.41:5001"
+haskellURL = settings.haskellURL
+
 
 """
 
 Arguments:
 
 (String) clue
-(int)    solutionLength
+(int)    word_length
 
 (solve_with_answer)
 
@@ -17,6 +19,10 @@ Arguments:
 (solve_with_pattern)
 
 (dict)   pattern
+
+(solve_with_cands)
+
+(String) candidates - comma-separated candidate solutions based on known letters
 
 
 Returns:
@@ -27,57 +33,29 @@ Returns:
 
 """
 
-def hs_solve_clue(clue, solutionLength):
-    clue = urllib.parse.quote(clue, safe='')
-
-    fullURL = f"{haskellURL}/solve/{clue}/{solutionLength}"
-
-    r = requests.get(url=fullURL)
+def hs_solve_clue(clue, word_length):
+    return call_haskell("", clue, word_length)
 
 
-    print(unlist(r.text))
-    return r
+def hs_solve_with_answer(clue, word_length, answer):
+    return call_haskell("WithAnswer", clue, word_length, answer=answer)
 
-def hs_solve_with_answer(clue, solutionLength, answer):
-    clue = urllib.parse.quote(clue, safe='')
 
-    fullURL = f"{haskellURL}/solveWithAnswer/{clue}/{solutionLength}/{answer}"
+def hs_solve_with_pattern(clue, word_length, pattern):
+    return call_haskell("All", clue, word_length)
 
-    r = requests.get(url=fullURL)
-
-    print(unlist(r.text))
-    return r
-
-def hs_solve_with_pattern(clue, solutionLength, pattern):
-    clue = urllib.parse.quote(clue, safe='')
-
-    fullURL = f"{haskellURL}/solveAll/{clue}/{solutionLength}"
-
-    r = requests.get(url=fullURL)
-
-    print(unlist(r.text))
-    return r
 
 def hs_solve_with_cands(clue, word_length, candidates):
-    clue = urllib.parse.quote(clue, safe='')
-
     cand_string = candidates.reduce(lambda a, b: a + "," + b)
 
-    fullURL = f"{haskellURL}/solveWithAnswers/{clue}/{word_length}/{cand_string}"
+    return call_haskell("WithAnswers", clue, word_length, cand_string=cand_string)
+
+
+def call_haskell(mode, clue, word_length, answer="", cand_string=""):
+    clue = urllib.parse.quote(clue, safe='')
+
+    fullURL = f"{haskellURL}/solve{mode}/{clue}/{word_length}/{answer}/{cand_string}"
 
     r = requests.get(url=fullURL)
 
-    print(unlist(r.text))
     return r
-
-
-# helper function to strip the [""] surrounding the response text
-def unlist(response):
-    return response[2:-2]
-
-"""
-if __name__ == "__main__":
-    hs_solve_clue("Peeling paint, profit slack, upset, in a state", 10)
-    hs_solve_clue("Following kick-off, running back for corner", 4)
-    hs_solve_with_answer("Peeling paint, profit slack, upset, in a state", 10, "california")
-"""
