@@ -1,5 +1,15 @@
 import requests
 import urllib.parse
+"""
+import os
+import dotenv
+
+dotenv_file = os.path.join(BASE_DIR, ".env")
+if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
+
+haskellURL = os.environ['HASKELL_URL']
+"""
 
 haskellURL = "http://84.238.224.41:5001"
 
@@ -8,7 +18,7 @@ haskellURL = "http://84.238.224.41:5001"
 Arguments:
 
 (String) clue
-(int)    solutionLength
+(int)    word_length
 
 (solve_with_answer)
 
@@ -31,41 +41,28 @@ Returns:
 
 """
 
-def hs_solve_clue(clue, solutionLength):
-    clue = urllib.parse.quote(clue, safe='')
-
-    fullURL = f"{haskellURL}/solve/{clue}/{solutionLength}"
-
-    r = requests.get(url=fullURL)
+def hs_solve_clue(clue, word_length):
+    return call_haskell("", clue, word_length)
 
 
-    print(unlist(r.text))
-    return r
+def hs_solve_with_answer(clue, word_length, answer):
+    return call_haskell("WithAnswer", clue, word_length, answer=answer)
 
-def hs_solve_with_answer(clue, solutionLength, answer):
-    clue = urllib.parse.quote(clue, safe='')
 
-    fullURL = f"{haskellURL}/solveWithAnswer/{clue}/{solutionLength}/{answer}"
+def hs_solve_with_pattern(clue, word_length, pattern):
+    return call_haskell("All", clue, word_length)
 
-    r = requests.get(url=fullURL)
-
-    return r
-
-def hs_solve_with_pattern(clue, solutionLength, pattern):
-    clue = urllib.parse.quote(clue, safe='')
-
-    fullURL = f"{haskellURL}/solveAll/{clue}/{solutionLength}"
-
-    r = requests.get(url=fullURL)
-
-    return r
 
 def hs_solve_with_cands(clue, word_length, candidates):
-    clue = urllib.parse.quote(clue, safe='')
-
     cand_string = candidates.reduce(lambda a, b: a + "," + b)
 
-    fullURL = f"{haskellURL}/solveWithAnswers/{clue}/{word_length}/{cand_string}"
+    return call_haskell("WithAnswers", clue, word_length, cand_string=cand_string)
+
+
+def call_haskell(mode, clue, word_length, answer="", cand_string=""):
+    clue = urllib.parse.quote(clue, safe='')
+
+    fullURL = f"{haskellURL}/solve{mode}/{clue}/{word_length}/{answer}/{cand_string}"
 
     r = requests.get(url=fullURL)
 
