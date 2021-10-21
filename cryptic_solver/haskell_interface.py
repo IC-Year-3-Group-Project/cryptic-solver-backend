@@ -1,14 +1,9 @@
 import requests
 import urllib.parse
+from cryptic_solver_project import settings
 
-import os
-import dotenv
+haskellURL = settings.haskellURL
 
-dotenv_file = os.path.join("..", ".env")
-if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
-
-haskellURL = os.environ['HASKELL_URL']
 
 """
 
