@@ -128,6 +128,21 @@ def solve_with_dict(request):
 
         return JsonResponse(solutions, safe=False)
 
+def explain_answer(request):
+    if request.method == 'OPTIONS':
+        return option_response()
+    else:
+
+        answer = json.loads(request.body)['answer']
+        word_length = json.loads(request.body)['word_length']
+        clue = json.loads(request.body)['clue']
+
+        response = hs_solve_with_answer(clue, word_length, answer, explain=True)
+
+        explanation = getExplanation(response.text)
+
+        return JsonResponse(explanation, safe=False)
+
 
 
 @csrf_exempt

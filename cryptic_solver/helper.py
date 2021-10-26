@@ -11,7 +11,7 @@ def load_words():
             if (res == None):
                 dict.update({length: [w]})
             else:
-                res.append(w) 
+                res.append(w)
     return dict.copy()
 
 def matching(pattern, responses):
@@ -37,4 +37,11 @@ def getCandidates(pattern, word_length):
     if english_dict == {}:
         english_dict = load_words()
     return matching(pattern, english_dict.get(word_length))
-    
+
+def getExplanation(response_text):
+    response_text = response_text.translate({ord(i): None for i in '\"\''})
+    if response_text == "[]":
+        return ""
+    split = response_text.split(':')
+    explanation = split[1].strip()
+    return explanation[:-1]
