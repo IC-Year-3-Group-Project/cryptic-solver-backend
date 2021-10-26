@@ -33,28 +33,30 @@ Returns:
 
 """
 
-def hs_solve_clue(clue, word_length):
-    return call_haskell("", clue, word_length)
+def hs_solve_clue(clue, word_length, explain=False):
+
+    return call_haskell("", clue, word_length, explain=explain)
 
 
 def hs_solve_with_answer(clue, word_length, answer):
-    return call_haskell("WithAnswer", clue, word_length, answer=answer)
+    return call_haskell("WithAnswer", clue, word_length, answer=answer, explain=explain)
 
 
 def hs_solve_with_pattern(clue, word_length, pattern):
-    return call_haskell("All", clue, word_length)
+    return call_haskell("All", clue, word_length, explain=explain)
 
 
 def hs_solve_with_cands(clue, word_length, candidates):
     cand_string = candidates.reduce(lambda a, b: a + "," + b)
 
-    return call_haskell("WithAnswers", clue, word_length, cand_string=cand_string)
+    return call_haskell("WithAnswers", clue, word_length, explain=explain, cand_string=cand_string)
 
 
-def call_haskell(mode, clue, word_length, answer="", cand_string=""):
+def call_haskell(mode, clue, word_length, explain=False, answer="", cand_string=""):
+    extra = "AndExplain" if explain else ""
     clue = urllib.parse.quote(clue, safe='')
 
-    fullURL = f"{haskellURL}/solve{mode}/{clue}/{word_length}/{answer}/{cand_string}"
+    fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answer}/{cand_string}"
 
     r = requests.get(url=fullURL)
 
