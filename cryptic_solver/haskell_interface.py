@@ -38,7 +38,7 @@ def hs_solve_clue(clue, word_length, explain=False):
     return call_haskell("", clue, word_length, explain=explain)
 
 
-def hs_solve_with_answer(clue, word_length, answer):
+def hs_solve_with_answer(clue, word_length, answer, explain=True):
     return call_haskell("WithAnswer", clue, word_length, answer=answer, explain=explain)
 
 
