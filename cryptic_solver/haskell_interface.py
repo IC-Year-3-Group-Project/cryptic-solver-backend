@@ -38,15 +38,15 @@ def hs_solve_clue(clue, word_length, explain=False):
     return call_haskell("", clue, word_length, explain=explain)
 
 
-def hs_solve_with_answer(clue, word_length, answer):
+def hs_solve_with_answer(clue, word_length, answer, explain=False):
     return call_haskell("WithAnswer", clue, word_length, answer=answer, explain=explain)
 
 
-def hs_solve_with_pattern(clue, word_length, pattern):
+def hs_solve_with_pattern(clue, word_length, explain=False):
     return call_haskell("All", clue, word_length, explain=explain)
 
 
-def hs_solve_with_cands(clue, word_length, candidates):
+def hs_solve_with_cands(clue, word_length, candidates, explain=False):
     cand_string = candidates.reduce(lambda a, b: a + "," + b)
 
     return call_haskell("WithAnswers", clue, word_length, explain=explain, cand_string=cand_string)
