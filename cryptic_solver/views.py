@@ -128,6 +128,7 @@ def solve_with_dict(request):
 
         return JsonResponse(solutions, safe=False)
 
+@csrf_exempt
 def explain_answer(request):
     if request.method == 'OPTIONS':
         return option_response()
@@ -142,8 +143,6 @@ def explain_answer(request):
         explanation = getExplanation(response.text)
 
         return JsonResponse(explanation, safe=False)
-
-
 
 @csrf_exempt
 def fetch_everyman(request):
