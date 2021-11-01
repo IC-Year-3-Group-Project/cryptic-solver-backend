@@ -18,7 +18,10 @@ isodate==0.6.0
 jstyleson==0.0.2
 lxml==4.6.3
 mf2py==1.1.2
+numpy==1.21.3
+opencv-python==4.5.4.58
 packaging==20.9
+Pillow==8.4.0
 protobuf==3.17.3
 psycopg2-binary==2.8.6
 pyasn1==0.4.8
@@ -26,6 +29,7 @@ pyasn1-modules==0.2.8
 pycparser==2.20
 pyparsing==2.4.7
 pyRdfa3==3.5.3
+pytesseract==0.3.8
 python-dotenv==0.17.1
 python-environ==0.4.54
 python3-openid==3.2.0
