@@ -30,8 +30,6 @@ def makeList(text):
     text = text.translate({ord(i): None for i in '[]\"\' '})
     return text.split(',')
 
-#getFromList("[california, mem, weewooweewoo]")
-
 def getCandidates(pattern, word_length):
     global english_dict
     if english_dict == {}:
@@ -45,3 +43,17 @@ def getExplanation(response_text):
     split = response_text.split(':')
     explanation = split[1].strip()
     return explanation[:-1]
+
+def get_most_confident(solutions):
+    max = 0
+    solution = ""
+    for candidate in solutions:
+        confidence = float(candidate['confidence'])
+        if confidence > max:
+            max = confidence
+            solution = candidate['candidate']
+
+    return solution
+
+def format_word_length(word_length):
+    return f"({str(word_length)})"

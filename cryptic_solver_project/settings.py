@@ -22,6 +22,8 @@ if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
 
 haskellURL = os.environ['HASKELL_URL']
+unlikely_password = os.environ['UNLIKELY_PASSWORD']
+unlikelyURL = f"https://api.crosswordgenius.com/cgibin/cm?account=2&password={unlikely_password}&json=1"
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
