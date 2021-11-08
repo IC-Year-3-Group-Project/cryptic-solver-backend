@@ -117,8 +117,6 @@ def create_grid(x_bounds, y_bounds, rectangles):
 
 # A function that uses the can_go_to attribute of the grid to assign
 # numbers to the cells from which you can only go down or right
-
-
 def fill_clue_numbers(grid):
     clue_number = 1
     m, n = np.shape(grid)
@@ -154,8 +152,6 @@ def fill_clue_numbers(grid):
 
 # Fill the lengths of the clues according to
 # whether it they are going down or accross
-
-
 def fill_clue_lengths(grid):
     m, n = np.shape(grid)
 
@@ -204,8 +200,6 @@ def get_grid_as_json(grid):
     return grid_as_json
 
 # Add a clue to the clues array
-
-
 def write_clue(grid, clues, j, k, direction):
     direction_number = direction == (1 if "down" else 0)
 
