@@ -2,7 +2,7 @@ import pytesseract
 import cv2
 import re
 
-pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
 def preprocess(image):
 
@@ -11,6 +11,23 @@ def preprocess(image):
     #image = thresholding(image)
 
     return image
+
+def preprocess_text(text):
+    character_replacements = {"©": "(5)", "|": "I", "®": "(5", "@": "(4)"}
+
+    for (k, r) in character_replacements.items():
+        replaced_text = text.replace(k, r)
+
+    # Take care of cases where the lengths of a two-word clue have been stuck together
+    for i in range(len(replaced_text)-2):
+        if replaced_text[i] == "(" and \
+           replaced_text[i + 1] > "1" and \
+           replaced_text[i + 1] <= "9" and \
+           replaced_text[i + 2] >= "1" and \
+           replaced_text[i + 2] <= "9":
+            replaced_text = replaced_text[:i + 2] + "," + replaced_text[i + 2:]
+    
+    return replaced_text
 
 
 #thresholding
@@ -27,13 +44,14 @@ def get_grayscale(image):
 
 def read_text(image_data):
     #TODO: need to change this to an environment variable for deployment
-    pytesseract.pytesseract.tesseract_cmd = 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
+    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
     processed = preprocess(image_data)
 
     custom_config = r'--oem 3 --psm 6'
     text = pytesseract.image_to_string(img, config=custom_config)
-    clues = parse_ocr(text)
+    preprocessed_text = preprocess_text(text)
+    clues = parse_ocr(preprocessed_text)
     return clues
 
 def parse_ocr(text):
@@ -50,6 +68,7 @@ def parse_ocr(text):
     clues = []
     clue = {}
     clue_text = ""
+
     for line in text.split("\n"):
         print(line)
         words = line.split()
@@ -59,7 +78,7 @@ def parse_ocr(text):
         # when a line starts with a number, it's a new clue (add the currently building clue to clues, make a new one)
         if re.match(r"\d+.*", words[0]) and len(words) > 1:
             if clue:
-                clue['clue'] = clue_text
+                clue['clue'] = clue_text.strip()
                 clues.append(clue)
             clue = {}
             clue_text = ""
@@ -87,7 +106,7 @@ def get_int(word):
 
 if __name__ == "__main__":
 
-    img = cv2.imread("../everyman 3901 clues across.PNG")
+    img = cv2.imread("everyman 3901 clues across.PNG")
 
     clues = read_text(img)
 
