@@ -22,11 +22,11 @@ Returns:
 
 """
 
-def unlikely_solve_clue(clue, solution_pattern):
+def uai_solve_clue(clue, solution_pattern):
     return call_unlikely(clue, solution_pattern)
 
 
-def unlikely_solve_with_pattern(clue, solution_pattern, letter_pattern):
+def uai_solve_with_pattern(clue, solution_pattern, letter_pattern):
     return call_unlikely(clue, solution_pattern, letter_pattern=letter_pattern)
 
 
