@@ -72,7 +72,27 @@ def unlikely_solve_clue(request):
 
             return JsonResponse(solution, safe=False)
 
+@csrf_exempt
+def unlikely_explain_clue(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        data = json.loads(request.body)
+        clue = data["clue"]
+        word_length = data["word_length"]
+        solution_pattern = format_word_length(word_length)
+        response = unlikely_solve_clue(clue, solution_pattern)
 
+        if response.status_code == 200:
+            solutions = response["candidate-list"]
+            solution = get_most_confident(solutions)
+            return JsonResponse(makeList(solution), safe=False)
+        else:
+            response = hs_solve_clue(clue, word_length)
+
+            solution = makeList(response.text)
+
+            return JsonResponse(solution, safe=False)
 
 
 
@@ -193,4 +213,3 @@ def fetch_everyman(request):
 
         print(urls)
         return JsonResponse({"urls": list(urls)})
-
