@@ -13,7 +13,7 @@ def preprocess(image):
     return image
 
 def preprocess_text(text):
-    character_replacements = {"©": "(5)", "|": "I", "®": "(5", "@": "(4)"}
+    character_replacements = {"°": " ", "©": "(5)", "|": "I", "®": "(5", "@": "(4)"}
 
     for (k, r) in character_replacements.items():
         replaced_text = text.replace(k, r)
@@ -78,7 +78,7 @@ def parse_ocr(text):
         # when a line starts with a number, it's a new clue (add the currently building clue to clues, make a new one)
         if re.match(r"\d+.*", words[0]) and len(words) > 1:
             if clue:
-                clue['clue'] = clue_text.strip()
+                clue['text'] = clue_text.strip()
                 clues.append(clue)
             clue = {}
             clue_text = ""
@@ -87,13 +87,15 @@ def parse_ocr(text):
 
         # if line ends with a number (excluding brackets) then that line ending is the solution pattern
         if re.match("(\()?\d+((\.,-)?\d+)*(\))?", words[-1]):
-            clue['solution_pattern'] = words[-1].replace('.', ',')
+            lengths_string = words[-1].replace('.', ',')[1:-1]
+            lenghts = lengths_string.split(",")
+            clue['lenghts'] = lenghts
             if len(words) > 0:
                 del words[-1]
 
         clue_text += " " + " ".join(words)
 
-    clue['clue'] = clue_text
+    clue['clue'] = clue_text.strip()
     clues.append(clue)
     return clues
 
