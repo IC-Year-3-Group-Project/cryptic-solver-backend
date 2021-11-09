@@ -7,5 +7,7 @@ urlpatterns = [
     path('fetch-crossword', fetch_crossword),
     path('solve-with-dict', solve_with_dict),
     path('fetch-everyman', fetch_everyman),
-    path('explain_answer', explain_answer)
+    path('explain_answer', explain_answer),
+    path('process-puzzle', process_puzzle),
+    path('get-puzzle', get_puzzle)
 ]
