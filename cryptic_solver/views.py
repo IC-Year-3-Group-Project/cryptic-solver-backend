@@ -63,7 +63,6 @@ def unlikely_solve_clue(request):
 
         if response.status_code == 200:
             data = json.loads(response.text)
-            print(data["screen-list"][1]["candidate-list"][0])
             solutions = parse_unlikely_with_explanations(data)
             return JsonResponse(solutions, safe=False)
         else:
