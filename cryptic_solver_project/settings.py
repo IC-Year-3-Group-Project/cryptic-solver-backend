@@ -22,7 +22,7 @@ if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
 
 haskellURL = os.environ['HASKELL_URL']
-if os.environ['TESSERACT_CMD']:
+if 'TESSERACT_CMD' in os.environ:
     tesseract_cmd = os.environ['TESSERACT_CMD']
 else:
     tesseract_cmd = ""
