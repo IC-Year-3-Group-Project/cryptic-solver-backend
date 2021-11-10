@@ -3,16 +3,20 @@ from django.http import JsonResponse
 from django.http import response
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
-
 from django.views.decorators.csrf import csrf_exempt
+from cryptic_solver.grid_recognition import get_grid_as_json, get_grid_from_image
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
 from cryptic_solver.text_recognition import read_text
 import requests
 import re
 import html
+import hashlib
+import numpy as np
 
 from bs4 import BeautifulSoup
+
+from cryptic_solver.models import Puzzle
 
 allowed_crossword_prefixes = ["https://www.theguardian.com/crosswords/everyman"]
 
@@ -168,11 +172,44 @@ def fetch_everyman(request):
         print(urls)
         return JsonResponse({"urls": list(urls)})
 
-"""
+@csrf_exempt
+def process_puzzle(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        json_object = json.loads(request.body)
+        b64_grid_image = json_object['grid']
+        across_image = json_object['across']
+        down_image = json_object['down']
+        mobile = json_object['mobile']
 
+        grid = get_grid_from_image(b64_grid_image)
+        # TODO populate grid with clues using OCR
+        puzzle = Puzzle.objects.create(grid_json=grid)
+        puzzle.save()
+
+        response = None
+
+        if mobile:
+            response = JsonResponse({"id": puzzle.id})
+        else:
+            response = JsonResponse({"id": puzzle.id, "grid": puzzle.grid})
+        return response
+
+@csrf_exempt
+def get_puzzle(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        json_object = json.loads(request.body)
+        id = json_object['id']
+
+        return JsonResponse({"grid": Puzzle.objects.filter(id=id).get(0).puzzle})
+
+
+"""
 returns:
     clues - list of dicts of form {'number': int, 'clue': string, 'solution-pattern': string}
-
 
 """
 
