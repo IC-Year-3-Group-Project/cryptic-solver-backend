@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HASKELL_URL: ${{secrets.HASKELL_URL}}
+      UNLIKELY_PASSWORD: ${{secrets.UNLIKELY_PASSWORD}}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
@@ -24,6 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HASKELL_URL: ${{secrets.HASKELL_URL}}
+      UNLIKELY_PASSWORD: ${{secrets.UNLIKELY_PASSWORD}}
     steps:
       - uses: actions/checkout@v2
       - uses: akhileshns/heroku-deploy@v3.12.12
