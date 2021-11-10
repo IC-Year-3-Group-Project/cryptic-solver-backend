@@ -22,6 +22,10 @@ if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
 
 haskellURL = os.environ['HASKELL_URL']
+if os.environ['TESSERACT_CMD']:
+    tesseract_cmd = os.environ['TESSERACT_CMD']
+else:
+    tesseract_cmd = ""
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/

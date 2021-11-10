@@ -1,8 +1,12 @@
 import pytesseract
 import cv2
 import re
+from cryptic_solver_project import settings
 
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+if settings.tesseract_cmd != "":
+    pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
+
+
 
 def preprocess(image):
 
@@ -26,7 +30,7 @@ def preprocess_text(text):
            replaced_text[i + 2] >= "1" and \
            replaced_text[i + 2] <= "9":
             replaced_text = replaced_text[:i + 2] + "," + replaced_text[i + 2:]
-    
+
     return replaced_text
 
 
@@ -44,7 +48,7 @@ def get_grayscale(image):
 
 def read_text(image_data):
     #TODO: need to change this to an environment variable for deployment
-    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+    #pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
     processed = preprocess(image_data)
 
@@ -88,8 +92,8 @@ def parse_ocr(text):
         # if line ends with a number (excluding brackets) then that line ending is the solution pattern
         if re.match("(\()?\d+((\.,-)?\d+)*(\))?", words[-1]):
             lengths_string = words[-1].replace('.', ',')[1:-1]
-            lenghts = lengths_string.split(",")
-            clue['lenghts'] = lenghts
+            lengths = lengths_string.split(",")
+            clue['lengths'] = lengths
             if len(words) > 0:
                 del words[-1]
 
@@ -108,7 +112,7 @@ def get_int(word):
 
 if __name__ == "__main__":
 
-    img = cv2.imread("everyman 3901 clues across.PNG")
+    img = cv2.imread("../everyman 3901 clues across.PNG")
 
     clues = read_text(img)
 
