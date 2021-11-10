@@ -1,4 +1,5 @@
 import json
+from django.db.models.query import QuerySet
 from django.http import JsonResponse
 from django.http import response
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
@@ -7,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.grid_recognition import get_grid_as_json, get_grid_from_image
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
+from cryptic_solver.image_recognition import recognize_image
 from cryptic_solver.unlikely_interface import *
 from cryptic_solver.text_recognition import read_text
 import requests
@@ -194,7 +196,6 @@ def fetch_everyman(request):
             ):
                 urls.add(l)
 
-        print(urls)
         return JsonResponse({"urls": list(urls)})
 
 
@@ -205,22 +206,19 @@ def process_puzzle(request):
     else:
         json_object = json.loads(request.body)
         b64_grid_image = json_object['grid']
-        across_image = json_object['across']
-        down_image = json_object['down']
+
+        b64_across_image = json_object['across']
+        b64_down_image = json_object['down']
+
         mobile = json_object['mobile']
 
-        grid = get_grid_from_image(b64_grid_image)
+        grid = recognize_image(b64_grid_image, b64_across_image, b64_down_image)
+
         # TODO populate grid with clues using OCR
         puzzle = Puzzle.objects.create(grid_json=grid)
         puzzle.save()
 
-        response = None
-
-        if mobile:
-            response = JsonResponse({"id": puzzle.id})
-        else:
-            response = JsonResponse({"id": puzzle.id, "grid": puzzle.grid})
-        return response
+        return JsonResponse({"id": puzzle.id, "grid": grid})
 
 @csrf_exempt
 def get_puzzle(request):
@@ -230,16 +228,8 @@ def get_puzzle(request):
         json_object = json.loads(request.body)
         id = json_object['id']
 
-        return JsonResponse({"grid": Puzzle.objects.filter(id=id).get(0).puzzle})
+        if (len(Puzzle.objects.filter(id=id)) == 0):
+            return JsonResponse({"grid": {}})
 
-
-"""
-returns:
-    clues - list of dicts of form {'number': int, 'clue': string, 'solution-pattern': string}
-
-"""
-
-def read_text(image_data):
-    clues = read_clues(image)
-    return JsonResponse(clues, safe=False)
+        return JsonResponse({"grid": Puzzle.objects.filter(id=id).get().grid_json})
 
