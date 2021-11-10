@@ -88,8 +88,8 @@ def parse_ocr(text):
         # if line ends with a number (excluding brackets) then that line ending is the solution pattern
         if re.match("(\()?\d+((\.,-)?\d+)*(\))?", words[-1]):
             lengths_string = words[-1].replace('.', ',')[1:-1]
-            lenghts = re.split(",|-", lengths_string)
-            clue['lenghts'] = lenghts
+            lengths = re.split(",|-", lengths_string)
+            clue['lengths'] = lengths
             if len(words) > 0:
                 del words[-1]
 
