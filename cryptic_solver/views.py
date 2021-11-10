@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.grid_recognition import get_grid_as_json, get_grid_from_image
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
+from cryptic_solver.text_recognition import read_text
 import requests
 import re
 import html
@@ -73,7 +74,7 @@ def solve_with_pattern(request):
         word_length = data["word_length"]
         pattern = data["pattern"]
 
-        response = hs_solve_with_pattern(clue, word_length, pattern)
+        response = hs_solve_with_pattern(clue, word_length)
 
         solutions = makeList(response.text)
 
@@ -206,5 +207,13 @@ def get_puzzle(request):
         return JsonResponse({"grid": Puzzle.objects.filter(id=id).get(0).puzzle})
 
 
-        
+"""
+returns:
+    clues - list of dicts of form {'number': int, 'clue': string, 'solution-pattern': string}
+
+"""
+
+def read_text(image_data):
+    clues = read_clues(image)
+    return JsonResponse(clues, safe=False)
 
