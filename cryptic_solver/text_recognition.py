@@ -2,7 +2,10 @@ import pytesseract
 import cv2
 import re
 
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+from cryptic_solver_project import settings
+
+if settings.tesseract_cmd != "":
+    pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
 
 def preprocess(image):
 
@@ -26,7 +29,7 @@ def preprocess_text(text):
            replaced_text[i + 2] >= "1" and \
            replaced_text[i + 2] <= "9":
             replaced_text = replaced_text[:i + 2] + "," + replaced_text[i + 2:]
-    
+
     return replaced_text
 
 
@@ -43,8 +46,6 @@ def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 def read_text(image_data):
-    #TODO: need to change this to an environment variable for deployment
-    pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
     processed = preprocess(image_data)
 
