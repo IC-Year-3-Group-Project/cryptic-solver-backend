@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from cryptic_solver.grid_recognition import get_grid_as_json, get_grid_from_image
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
+from cryptic_solver.unlikely_interface import *
 from cryptic_solver.text_recognition import read_text
 import requests
 import re
@@ -51,8 +52,32 @@ def solve_clue(request):
 
         solution = makeList(response.text)
 
-        # TODO: need to check what sort of data is actually required in the response
         return JsonResponse(solution, safe=False)
+
+
+@csrf_exempt
+def unlikely_solve_clue(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        data = json.loads(request.body)
+        clue = data["clue"]
+        word_length = data["word_length"]
+        solution_pattern = format_word_length(word_length)
+        response = uai_solve_clue(clue, solution_pattern)
+
+        if response.status_code == 200:
+            data = json.loads(response.text)
+            solutions = parse_unlikely_with_explanations(data)
+            return JsonResponse(solutions, safe=False)
+        else:
+            response = hs_solve_clue(clue, word_length)
+
+            solution = makeList(response.text)
+
+            return JsonResponse(solution, safe=False)
+
+
 
 
 """
@@ -171,6 +196,7 @@ def fetch_everyman(request):
 
         print(urls)
         return JsonResponse({"urls": list(urls)})
+
 
 @csrf_exempt
 def process_puzzle(request):

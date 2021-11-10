@@ -102,6 +102,7 @@ def parse_ocr(text):
     clues.append(clue)
     return clues
 
+
 def get_int(word):
     result = ""
     for char in word:
