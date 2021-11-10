@@ -207,7 +207,7 @@ def get_grid_as_json(grid):
 
 # Add a clue to the clues array
 def write_clue(grid, clues, j, k, direction):
-    direction_number = direction == (1 if "down" else 0)
+    direction_number = 1 if direction == "down" else 0
 
     if "clue_number" in grid[j][k]:
         clues.append({
@@ -219,3 +219,4 @@ def write_clue(grid, clues, j, k, direction):
             "x": k,
             "y": j,
         })
+

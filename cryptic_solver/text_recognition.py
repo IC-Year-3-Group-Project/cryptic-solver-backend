@@ -1,12 +1,11 @@
 import pytesseract
 import cv2
 import re
+
 from cryptic_solver_project import settings
 
 if settings.tesseract_cmd != "":
     pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
-
-
 
 def preprocess(image):
 
@@ -47,13 +46,11 @@ def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 def read_text(image_data):
-    #TODO: need to change this to an environment variable for deployment
-    #pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
 
     processed = preprocess(image_data)
 
     custom_config = r'--oem 3 --psm 6'
-    text = pytesseract.image_to_string(img, config=custom_config)
+    text = pytesseract.image_to_string(processed, config=custom_config)
     preprocessed_text = preprocess_text(text)
     clues = parse_ocr(preprocessed_text)
     return clues
@@ -91,14 +88,14 @@ def parse_ocr(text):
         # if line ends with a number (excluding brackets) then that line ending is the solution pattern
         if re.match("(\()?\d+((\.,-)?\d+)*(\))?", words[-1]):
             lengths_string = words[-1].replace('.', ',')[1:-1]
-            lengths = lengths_string.split(",")
-            clue['lengths'] = lengths
+            lenghts = re.split(",|-", lengths_string)
+            clue['lenghts'] = lenghts
             if len(words) > 0:
                 del words[-1]
 
         clue_text += " " + " ".join(words)
 
-    clue['clue'] = clue_text.strip()
+    clue['text'] = clue_text.strip()
     clues.append(clue)
     return clues
 
