@@ -1,6 +1,7 @@
 import cv2
 import math
 import numpy as np
+import base64
 
 # Define constants to use later
 square_factor = 2.0 / 3.0
@@ -9,7 +10,15 @@ area_factor = 2.0 / 3.0
 epsilon = 0.0005
 
 # Get the grid in a dictionary format from an image
-def get_grid_from_image(image):
+def get_grid_from_image(image=None):
+
+    if image == None:
+        # Read image into a matrix
+        image = cv2.imread("crossword.png")
+    else:
+        im_bytes = base64.b64decode(image)
+        im_arr = np.frombuffer(im_bytes, dtype=np.uint8) 
+        image = cv2.imdecode(im_arr, flags=cv2.IMREAD_COLOR)
 
     # Convert RGB to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
