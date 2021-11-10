@@ -49,7 +49,7 @@ def read_text(image_data):
     processed = preprocess(image_data)
 
     custom_config = r'--oem 3 --psm 6'
-    text = pytesseract.image_to_string(img, config=custom_config)
+    text = pytesseract.image_to_string(processed, config=custom_config)
     preprocessed_text = preprocess_text(text)
     clues = parse_ocr(preprocessed_text)
     return clues
@@ -70,7 +70,6 @@ def parse_ocr(text):
     clue_text = ""
 
     for line in text.split("\n"):
-        print(line)
         words = line.split()
         if len(words) == 0:
             continue
@@ -88,14 +87,14 @@ def parse_ocr(text):
         # if line ends with a number (excluding brackets) then that line ending is the solution pattern
         if re.match("(\()?\d+((\.,-)?\d+)*(\))?", words[-1]):
             lengths_string = words[-1].replace('.', ',')[1:-1]
-            lenghts = lengths_string.split(",")
+            lenghts = re.split(",|-", lengths_string)
             clue['lenghts'] = lenghts
             if len(words) > 0:
                 del words[-1]
 
         clue_text += " " + " ".join(words)
 
-    clue['clue'] = clue_text.strip()
+    clue['text'] = clue_text.strip()
     clues.append(clue)
     return clues
 
@@ -105,11 +104,3 @@ def get_int(word):
         if char.isnumeric():
             result += char
     return int(result)
-
-if __name__ == "__main__":
-
-    img = cv2.imread("everyman 3901 clues across.PNG")
-
-    clues = read_text(img)
-
-    print(clues)
