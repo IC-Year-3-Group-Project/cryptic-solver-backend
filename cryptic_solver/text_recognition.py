@@ -74,7 +74,6 @@ def parse_ocr(text):
     clue_text = ""
 
     for line in text.split("\n"):
-        print(line)
         words = line.split()
         if len(words) == 0:
             continue
@@ -109,11 +108,3 @@ def get_int(word):
         if char.isnumeric():
             result += char
     return int(result)
-
-if __name__ == "__main__":
-
-    img = cv2.imread("../everyman 3901 clues across.PNG")
-
-    clues = read_text(img)
-
-    print(clues)
