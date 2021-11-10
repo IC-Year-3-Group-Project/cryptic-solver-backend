@@ -19,7 +19,7 @@ jstyleson==0.0.2
 lxml==4.6.3
 mf2py==1.1.2
 numpy==1.21.3
-opencv-python==4.5.4.58
+opencv-python-headless==4.5.4.58
 packaging==20.9
 Pillow==8.4.0
 protobuf==3.17.3
