@@ -21,7 +21,18 @@ dotenv_file = os.path.join(BASE_DIR, ".env")
 if os.path.isfile(dotenv_file):
     dotenv.load_dotenv(dotenv_file)
 
-haskellURL = os.environ['HASKELL_URL']
+if 'HASKELL_URL' in os.environ:
+    haskellURL = os.environ['HASKELL_URL']
+else:
+    haskellURL = ""
+
+if 'UNLIKELY_PASSWORD' in os.environ:
+    unlikely_password = os.environ['UNLIKELY_PASSWORD']
+else:
+    unlikely_password = ""
+
+unlikelyURL = f"https://api.crosswordgenius.com/cgi-bin/cm?account=2&password={unlikely_password}&json=1"
+
 if 'TESSERACT_CMD' in os.environ:
     tesseract_cmd = os.environ['TESSERACT_CMD']
 else:

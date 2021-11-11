@@ -11,11 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HASKELL_URL: ${{secrets.HASKELL_URL}}
+      UNLIKELY_PASSWORD: ${{secrets.UNLIKELY_PASSWORD}}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: '3.x' 
+      - run: sudo apt-get install ffmpeg libsm6 libxext6  -y
       - run: pip install -r requirements.txt
       - run: python manage.py migrate
       - run: python manage.py test
