@@ -49,7 +49,7 @@ def read_text(image_data):
 
     processed = preprocess(image_data)
 
-    custom_config = r'--oem 3 --psm 6'
+    custom_config = r"--oem 3 --psm 6"
     text = pytesseract.image_to_string(processed, config=custom_config)
     preprocessed_text = preprocess_text(text)
     clues = parse_ocr(preprocessed_text)
@@ -59,7 +59,7 @@ def parse_ocr(text):
 
     """
     the idea:
-        - when a line starts with a number, it's a new clue (add the currently building clue to clues, make a new one)
+        - when a line starts with a number, it"s a new clue (add the currently building clue to clues, make a new one)
         - all text past that is the actual clue
         - if line ends with a number (excluding brackets) then that line ending is the solution pattern
         - replace . with ,
@@ -75,27 +75,27 @@ def parse_ocr(text):
         if len(words) == 0:
             continue
 
-        # when a line starts with a number, it's a new clue (add the currently building clue to clues, make a new one)
+        # when a line starts with a number, it"s a new clue (add the currently building clue to clues, make a new one)
         if re.match(r"\d+.*", words[0]) and len(words) > 1:
             if clue:
-                clue['text'] = clue_text.strip()
+                clue["text"] = clue_text.strip()
                 clues.append(clue)
             clue = {}
             clue_text = ""
-            clue['number'] = get_int(words[0])
+            clue["number"] = get_int(words[0])
             del words[0]
 
         # if line ends with a number (excluding brackets) then that line ending is the solution pattern
         if re.match("(\()?\d+((\.,-)?\d+)*(\))?", words[-1]):
-            lengths_string = words[-1].replace('.', ',')[1:-1]
+            lengths_string = words[-1].replace(".", ",")[1:-1]
             lengths = re.split(",|-", lengths_string)
-            clue['lengths'] = lengths
+            clue["lengths"] = lengths
             if len(words) > 0:
                 del words[-1]
 
         clue_text += " " + " ".join(words)
 
-    clue['text'] = clue_text.strip()
+    clue["text"] = clue_text.strip()
     clues.append(clue)
     return clues
 
