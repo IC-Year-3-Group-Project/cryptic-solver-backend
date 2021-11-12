@@ -82,3 +82,26 @@ def parse_unlikely_with_explanations(unlikely_json):
             answers.append(answer)
 
     return answers
+
+def format_haskell_answers(response):
+    """
+    Response from haskell server is in the form:
+    ["<answer with explanation>", "<answer with explanation>", ...]
+    """
+    # response = response.translate({ord(i): None for i in '[]\"\' '})
+
+    # Trim opening and closing square bracket
+    response = response[1, len(response) - 1]
+
+    # Split response into a list of solutions - answers with explanations
+    solutions = response.split(',')
+    for solution in solutions:
+        # Trim quotes
+        solution = solution[1, len(solution) - 1]
+        # Split into answer and explanation
+        solution = solution.split(':')
+        # Get rid of whitespace in answer
+        solution[0] = solution[0].replace(" ", "")
+
+
+    return solutions

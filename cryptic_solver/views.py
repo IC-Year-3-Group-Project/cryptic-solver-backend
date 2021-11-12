@@ -79,7 +79,19 @@ def unlikely_solve_clue(request):
 
             return JsonResponse(solution, safe=False)
 
+@csrf_exempt
+def solve_and_explain(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        data = json.loads(request.body)
+        clue = data["clue"]
+        word_length = data["word_length"]
+        response = hs_solve_clue(clue, word_length)
 
+        solution = makeList(response.text)
+
+        return JsonResponse(solution, safe=False)
 
 
 """
@@ -232,4 +244,3 @@ def get_puzzle(request):
             return JsonResponse({"grid": {}})
 
         return JsonResponse({"grid": Puzzle.objects.filter(id=id).get().grid_json})
-
