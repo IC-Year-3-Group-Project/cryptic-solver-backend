@@ -30,6 +30,8 @@ def recognize_image(b64_grid, b64_across, b64_down):
             grid_clue["text"] = clue["text"]
             grid_clue["lengths"] = list(map(int, clue["lengths"]))
 
+    grid_dict["clues"].sort(key=lambda c: c["number"])
+
     return grid_dict
 
 def b64ToMatrix(b64_image):
