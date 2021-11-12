@@ -206,7 +206,7 @@ def write_clue(grid, clues, j, k, direction):
             "number": grid[j][k]["clue_number"],
             "direction": direction_number,
             "text": "TODO",
-            "total_length": grid[j][k][direction],
+            "totalLength": grid[j][k][direction],
             "lengths": [grid[j][k][direction]],
             "x": k,
             "y": j,
