@@ -64,9 +64,16 @@ def parse_unlikely_with_explanations(unlikely_json):
     Parses the json from the call to unlikely.ai API and build list of solutions
     with explanations
     """
-    # Index into screen list, then second element of screen list is the data we
+    # Index into screen list, then fifth element of screen list is the data we
     # need and then get the candidate list
-    candidates = unlikely_json["screen-list"][1]["candidate-list"]
+    candidates = unlikely_json["screen-list"]
+    candidates = candidates[len(candidates) - 1]
+
+    # Check if list of candidates exists
+    if "candidate-list" in candidates:
+        candidates = candidates["candidate-list"]
+    else:
+        return []
 
     # The minimum confidence an answer must have in order to be returned
     # to frontend
@@ -88,16 +95,14 @@ def format_haskell_answers(response):
     Response from haskell server is in the form:
     ["<answer with explanation>", "<answer with explanation>", ...]
     """
-    # response = response.translate({ord(i): None for i in '[]\"\' '})
-
     # Trim opening and closing square bracket
-    response = response[1, len(response) - 1]
+    response = response[1 : len(response) - 1]
 
     # Split response into a list of solutions - answers with explanations
     solutions = response.split(',')
     for solution in solutions:
         # Trim quotes
-        solution = solution[1, len(solution) - 1]
+        solution = solution[1 : len(solution) - 1]
         # Split into answer and explanation
         solution = solution.split(':')
         # Get rid of whitespace in answer
