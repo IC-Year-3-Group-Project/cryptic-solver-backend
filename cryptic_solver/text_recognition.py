@@ -90,8 +90,6 @@ def parse_ocr(text):
             lengths_string = words[-1].replace(".", ",")[1:-1]
             lengths = re.split(",|-", lengths_string)
             clue["lengths"] = lengths
-            if len(words) > 0:
-                del words[-1]
 
         clue_text += " " + " ".join(words)
 
