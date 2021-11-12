@@ -109,8 +109,12 @@ WSGI_APPLICATION = 'cryptic_solver_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'de63asegqs6974',
+        'HOST' : 'ec2-176-34-116-203.eu-west-1.compute.amazonaws.com',
+        'PORT' : 5432,
+        'USER' : 'nmubaidzllyauu',
+        'PASSWORD' : 'b63acad06276ddeb91093054f35b71a45830dd5ae312bf26befd9f4693ca9340',
     }
 }
 
