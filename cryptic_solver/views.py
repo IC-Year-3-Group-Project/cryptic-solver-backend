@@ -104,10 +104,9 @@ def solve_and_explain(request):
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
 
-        print(hs_solutions)
-        print(unlikely_solutions)
+        all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
-        return JsonResponse(unlikely_solutions, safe=False)
+        return JsonResponse(all_solutions, safe=False)
 
 
 """

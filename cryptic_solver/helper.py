@@ -98,9 +98,12 @@ def format_haskell_answers(response):
     # Trim opening and closing square bracket
     response = response[1 : len(response) - 1]
 
-    # Split response into a list of solutions - answers with explanations
-    solutions = response.split(',')
-    for solution in solutions:
+    # Split response into a list of responses - answers with explanations
+    responses = response.split(',')
+    solutions = []
+
+    for i in range(len(responses)):
+        solution = responses[i]
         # Trim quotes
         solution = solution[1 : len(solution) - 1]
         # Split into answer and explanation
@@ -108,5 +111,32 @@ def format_haskell_answers(response):
         # Get rid of whitespace in answer
         solution[0] = solution[0].replace(" ", "")
 
+        # Build dictionary in desired format
+        sol = {}
+        sol["answer"] = solution[0]
+        sol["confidence"] = 1.0 / len(responses)
+        sol["explanation"] = solution[1]
+
+        solutions.append(sol)
 
     return solutions
+
+def combine_solutions(hs_solutions, unlikely_solutions):
+    """
+    Takes the two lists of solutions produced from the Haskell solver
+    and the Unlikely solver and adds all not duplicated Haskell solutions to
+    the Unlikely solutions.
+
+    returns the Unlikely solutions
+    """
+    for hs_sol in hs_solutions:
+        is_duplicate = False
+        for uai_sol in unlikely_solutions:
+            if hs_sol["answer"] == uai_sol["answer"]:
+                is_duplicate = True
+                break;
+
+        if not is_duplicate:
+            unlikely_solutions.append(hs_sol)
+
+    return unlikely_solutions
