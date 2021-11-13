@@ -95,11 +95,15 @@ def format_haskell_answers(response):
     Response from haskell server is in the form:
     ["<answer with explanation>", "<answer with explanation>", ...]
     """
+    # Check if response is not empty
+    if response == "[]":
+        return []
+
     # Trim opening and closing square bracket
     response = response[1 : len(response) - 1]
-
     # Split response into a list of responses - answers with explanations
     responses = response.split(',')
+
     solutions = []
 
     for i in range(len(responses)):
