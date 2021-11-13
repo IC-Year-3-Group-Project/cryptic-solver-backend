@@ -64,7 +64,7 @@ def parse_unlikely_with_explanations(unlikely_json):
     Parses the json from the call to unlikely.ai API and build list of solutions
     with explanations
     """
-    # Index into screen list, then fifth element of screen list is the data we
+    # Index into screen list, then last element of screen list is the data we
     # need and then get the candidate list
     candidates = unlikely_json["screen-list"]
     candidates = candidates[len(candidates) - 1]
