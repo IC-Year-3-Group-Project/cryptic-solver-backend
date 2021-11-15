@@ -5,12 +5,12 @@ from django.http import response
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
 from django.views.decorators.csrf import csrf_exempt
-from cryptic_solver.grid_recognition import get_grid_as_json, get_grid_from_image
+from cryptic_solver.image_processing.grid_recognition import get_grid_as_json, get_grid_from_image
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
-from cryptic_solver.image_recognition import recognize_image
+from cryptic_solver.image_processing.image_recognition import recognize_image
 from cryptic_solver.unlikely_interface import *
-from cryptic_solver.text_recognition import read_text
+from cryptic_solver.image_processing.text_recognition import read_text
 import requests
 import re
 import html
