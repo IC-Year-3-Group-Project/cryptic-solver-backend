@@ -79,7 +79,34 @@ def unlikely_solve_clue(request):
 
             return JsonResponse(solution, safe=False)
 
+@csrf_exempt
+def solve_and_explain(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        # Get data from request
+        data = json.loads(request.body)
+        clue = data["clue"]
+        word_length = data["word_length"]
 
+        # Gather solutions from Haskell solver
+        hs_response = hs_solve_and_explain_clue(clue, word_length)
+        hs_solutions = []
+        if hs_response.status_code == 200:
+            hs_solutions = format_haskell_answers(hs_response.text)
+
+
+        # Gather solutions from Unlikely solver
+        solution_pattern = format_word_length(word_length)
+        unlikely_response = uai_solve_clue(clue, solution_pattern)
+        unlikely_solutions = []
+        if unlikely_response.status_code == 200:
+            data = json.loads(unlikely_response.text)
+            unlikely_solutions = parse_unlikely_with_explanations(data)
+
+        all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
+
+        return JsonResponse(all_solutions, safe=False)
 
 
 """
@@ -232,4 +259,3 @@ def get_puzzle(request):
             return JsonResponse({"grid": {}})
 
         return JsonResponse({"grid": Puzzle.objects.filter(id=id).get().grid_json})
-

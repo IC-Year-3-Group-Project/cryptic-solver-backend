@@ -18,8 +18,9 @@ def preprocess(image):
 def preprocess_text(text):
     character_replacements = {"°": " ", "©": "(5)", "|": "I", "®": "(5", "@": "(4)"}
 
+    replaced_text = text
     for (k, r) in character_replacements.items():
-        replaced_text = text.replace(k, r)
+        replaced_text = replaced_text.replace(k, r)
 
     # Take care of cases where the lengths of a two-word clue have been stuck together
     for i in range(len(replaced_text)-2):
@@ -90,8 +91,6 @@ def parse_ocr(text):
             lengths_string = words[-1].replace(".", ",")[1:-1]
             lengths = re.split(",|-", lengths_string)
             clue["lengths"] = lengths
-            if len(words) > 0:
-                del words[-1]
 
         clue_text += " " + " ".join(words)
 
