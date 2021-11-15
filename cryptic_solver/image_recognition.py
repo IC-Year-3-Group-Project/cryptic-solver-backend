@@ -20,15 +20,15 @@ def recognize_image(b64_grid, b64_across, b64_down):
 
     for clue in down_dict:
       for grid_clue in grid_clues:
-          if grid_clue["direction"] == 1 and grid_clue["number"] == clue["number"]:
-            grid_clue["text"] = clue["text"]
-            grid_clue["lengths"] = list(map(int, clue["lengths"]))
-    
+          if grid_clue["direction"] == 1 and grid_clue["number"] == clue.get("number", -1):
+            grid_clue["text"] = clue.get("text", "TODO")
+            grid_clue["lengths"] = list(map(int, clue.get("lengths", [0])))
+
     for clue in across_dict:
       for grid_clue in grid_clues:
-          if grid_clue["direction"] == 0 and grid_clue["number"] == clue["number"]:
-            grid_clue["text"] = clue["text"]
-            grid_clue["lengths"] = list(map(int, clue["lengths"]))
+          if grid_clue["direction"] == 0 and grid_clue["number"] == clue.get("number", -1):
+            grid_clue["text"] = clue.get("text", "TODO")
+            grid_clue["lengths"] = list(map(int, clue.get("lengths", [0])))
 
     grid_dict["clues"].sort(key=lambda c: c["number"])
 
