@@ -2,9 +2,15 @@ import cv2
 import imutils
 import numpy as np
 import PIL.Image
+import pytesseract
+import re
+# pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
+# !!! Tesseract command different on every machine
 
+def black_treshold(r, g, b):
+    return r < 100 and g < 100 and b < 100
 
-def thicken_black_contours(image_path):
+def thicken_black_contours(cv2_img):
     '''
     Makes the black lines in the image thicker so that
     they could be more easily recognized.
@@ -15,20 +21,22 @@ def thicken_black_contours(image_path):
     Return:
     img2: Image with thickened black contours
     '''
-
+ 
     # Load the image and a copy of it to modify as a PIL images
-    img = PIL.Image.open(image_path)
-    img2 = PIL.Image.open(image_path)
+    cv2_img = cv2.cvtColor(cv2_img, cv2.COLOR_BGR2RGB)
+    img = PIL.Image.fromarray(cv2_img)
+    img2 = PIL.Image.fromarray(cv2_img)
     width, height = img.size
     pix = img.load()
     pix2 = img2.load()
+
 
     # Change the neighbourhood pixels of the black pixels to
     # black where there is threshold for classifying as black
     for x in range(5, width - 5):
         for y in range(5, height - 5):
             (r, g, b) = pix[x, y]
-            if r < 100 and g < 100 and b < 100:
+            if black_treshold(r, g, b):
                 pix2[x, y] = (0, 0, 0)
                 for i in range(5):
                     for j in range(5):
@@ -39,7 +47,7 @@ def thicken_black_contours(image_path):
     for x in range(width):
         for y in range(height):
             (r, g, b) = pix2[x, y]
-            if r >= 100 or g >= 100 or b >= 100:
+            if not black_treshold(r, g, b):
                 pix2[x, y] = (255, 255, 255)
 
     img2.save("out/black.png")
@@ -101,7 +109,7 @@ def transform_to_cornersangle(image, points):
     return rectangular_image
 
 
-def rotate_image(path):
+def process_grid_image(cv2_img):
     '''
     Detects the corners of the grid and rotates it to a rectangle 
     with sides parallel and perpendicular to the horizontal
@@ -113,7 +121,7 @@ def rotate_image(path):
     rectangular_image: The image with non-tilted grid inside
     '''
 
-    pil_image = thicken_black_contours(path)
+    pil_image = thicken_black_contours(cv2_img)
     image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
 
     # We need to resize the image to be able to find the contours
@@ -154,5 +162,20 @@ def rotate_image(path):
         original_image, corner_points)
     cv2.imwrite("out/warped.png", rectangular_image)
 
+    return rectangular_image
 
-rotate_image('out/IMG_0146 (1).png')
+# Takes a cv2 image
+def transform_text_image(image):
+    print(pytesseract.image_to_osd(image))
+    angle = 360 - int(re.search('(?<=Rotate: )\d+', pytesseract.image_to_osd(image)).group(0))
+    height, width = image.shape[:2]
+
+    # Perform the rotation
+    M = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1.0)
+    rotated = cv2.warpAffine(image, M, (width, height))
+    
+    cv2.imwrite("out/rotated.png", rotated)
+    return rotated
+
+
+

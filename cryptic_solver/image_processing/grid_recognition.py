@@ -1,6 +1,7 @@
 import cv2
 import math
 import numpy as np
+from transform_image import *
 
 # Define constants to use later
 square_factor = 2.0 / 3.0
@@ -22,6 +23,7 @@ def get_grid_from_image(image):
                   rows: int 
                   columns: int
     '''
+    image = process_grid_image(image)
 
     # Convert RGB to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

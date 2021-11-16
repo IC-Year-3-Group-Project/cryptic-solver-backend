@@ -1,11 +1,7 @@
 import pytesseract
 import cv2
 import re
-from cryptic_solver_project import settings
-
-if settings.tesseract_cmd != "":
-    pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
-
+# !!! Tesseract cmd not set 
 
 def preprocess_text(text):
     '''
@@ -120,7 +116,7 @@ def get_int(word):
 
     result = ""
     for char in word:
-        if char.isnumeri():
+        if char.isnumeric():
             result += char
 
     return int(result)
