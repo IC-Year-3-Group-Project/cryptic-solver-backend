@@ -1,7 +1,6 @@
 import cv2
 import math
 import numpy as np
-import base64
 
 # Define constants to use later
 square_factor = 2.0 / 3.0
@@ -9,17 +8,29 @@ min_area = 5.5
 area_factor = 2.0 / 3.0
 epsilon = 0.0005
 
-# Get the grid in a dictionary format from an image
+
 def get_grid_from_image(image):
+    '''
+    Get the grid in a dictionary format from an image
+
+    Parameters: 
+    image: Image data array (ndarray)
+
+    Return:
+    grid_as_json: Dictionary with fields:
+                  clues: Array of clues
+                  rows: int 
+                  columns: int
+    '''
 
     # Convert RGB to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Threshold image to black and white
-    flag, thresh = cv2.threshold(gray, 215, 255, cv2.THRESH_BINARY)
+    _, thresh = cv2.threshold(gray, 215, 255, cv2.THRESH_BINARY)
 
     # Find contours
-    contours, hierarchy = cv2.findContours(
+    contours, _ = cv2.findContours(
         thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     contour_list = []
@@ -89,10 +100,21 @@ def get_grid_from_image(image):
     return grid_as_json
 
 
-# Initialize the grid as an array containing the
-# location and sizes of the cells
 def create_grid(x_bounds, y_bounds, rectangles):
+    '''
+    Initialize the grid as an array containing the
+    location and sizes of the cells
 
+    Parameters: 
+    x_bounds: Array of x-coordinates of the cells (ndarray)
+    y_bounds: Array of y-coordinates of the cells (ndarray)
+    rectangles: The cells with their x, y, width and height (ndarray)
+
+    Return:
+    grid: Array with the same structure as the grid
+          that has a dictionary field for each cell
+
+    '''
     x_bounds_len = len(x_bounds)
     y_bounds_len = len(y_bounds)
 
@@ -113,9 +135,17 @@ def create_grid(x_bounds, y_bounds, rectangles):
 
     return grid
 
-# A function that uses the can_go_to attribute of the grid to assign
-# numbers to the cells from which you can only go down or right
+# 
 def fill_clue_numbers(grid):
+    '''
+    Fill clue numbers for the cells that should contain
+    a number
+
+    Parameters: 
+    grid: An array representation of the grid with dictionary
+          fields for each cell
+    '''
+
     clue_number = 1
     m, n = np.shape(grid)
 
@@ -134,6 +164,8 @@ def fill_clue_numbers(grid):
 
             can_go_to = grid[j][k].get("can_go_to")
 
+            # Assign numbers to the cells from which you can only go 
+            # down or right
             is_clue = False
             if not "top" in can_go_to and "bottom" in can_go_to:
                 grid[j][k]["is_down"] = True
@@ -148,9 +180,17 @@ def fill_clue_numbers(grid):
             if (is_clue):
                 clue_number = clue_number + 1
 
-# Fill the lengths of the clues according to
-# whether it they are going down or accross
+
 def fill_clue_lengths(grid):
+    '''
+    Fill clue lengths from the bottom right to the top left
+    according to whether they are going down or accross
+
+    Parameters: 
+    grid: An array representation of the grid with dictionary
+          fields for each cell
+    '''
+
     m, n = np.shape(grid)
 
     for j in range(m-1, -1, -1):
@@ -173,8 +213,21 @@ def fill_clue_lengths(grid):
             grid[j][k]["right"] = right
 
 
-# Create a JSON object from the grid
 def get_grid_as_json(grid):
+    '''
+    Create a JSON object from the grid
+
+    Parameters: 
+    grid: An array representation of the grid with dictionary
+          fields for each cell
+
+    Return:
+    grid_as_json: Dictionary with fields:
+                  clues: (ndarray)
+                  rows: (int) 
+                  columns: (int) 
+    '''
+
     clues = []
     m, n = np.shape(grid)
 
@@ -197,8 +250,20 @@ def get_grid_as_json(grid):
 
     return grid_as_json
 
-# Add a clue to the clues array
+
 def write_clue(grid, clues, j, k, direction):
+    '''
+    Add a clue to the clues array
+
+    Parameters: 
+    grid: An array representation of the grid with dictionary
+          fields for each cell
+    clues: The clues array so far (ndarray)
+    j: The current cell x-coordinate (int)
+    k: The current cell y-coordinate (int)
+    direction: The current clue direction (String)
+    '''
+
     direction_number = 1 if direction == "down" else 0
 
     if "clue_number" in grid[j][k]:
