@@ -1,7 +1,7 @@
 import cv2
 import math
 import numpy as np
-from transform_image import *
+from cryptic_solver.image_processing.transform_image import *
 
 # Define constants to use later
 square_factor = 2.0 / 3.0
