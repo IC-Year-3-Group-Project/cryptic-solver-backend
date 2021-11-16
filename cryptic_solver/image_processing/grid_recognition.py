@@ -135,7 +135,7 @@ def create_grid(x_bounds, y_bounds, rectangles):
 
     return grid
 
-# 
+
 def fill_clue_numbers(grid):
     '''
     Fill clue numbers for the cells that should contain
