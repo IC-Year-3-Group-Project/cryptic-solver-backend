@@ -29,10 +29,12 @@ def get_grid_from_image(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
     # Threshold image to black and white
-    _, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
-    
+    _, thresh = cv2.threshold(
+        gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+
     # Find contours
-    contours, _ = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(
+        thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     contour_list = []
 
