@@ -1,36 +1,22 @@
-import easyocr
 import pytesseract
 import cv2
 import re
-import numpy as np
-import pandas as pd
+import easyocr
 from functools import reduce
-from cryptic_solver.image_processing.transform_image import transform_text_image
-# from cryptic_solver_project import settings
-
-# if settings.tesseract_cmd != "":
-#     pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
-
-# pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+from transform_image import transform_text_image
 
 reader = easyocr.Reader(['en'])
 
+
 def preprocess_original(image):
     image = get_grayscale(image)
-    cv2.imwrite('thresh.png', image)
     return image
 
 
 def preprocess(image):
     gray = get_grayscale(image)
     blurred = remove_noise(gray)
-    # image = adaptive_thresholding(image)
     thresh = thresholding(blurred)
-    # image = distance_transform(image)
-
-    cv2.imwrite('gray.png', gray)
-    cv2.imwrite('blurred.png', blurred)
-    cv2.imwrite('thresh.png', thresh)
 
     image = thresh
     return image
@@ -70,43 +56,25 @@ def postprocess_text(text):
     return replaced_text
 
 
-def distance_transform(image):
-    "distance transform"
-    return cv2.distanceTransform(image, cv2.DIST_L2, 5)
-
-
-def adaptive_thresholding(image):
-    "thresholding"
-    return cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 71, 6)
-
-
-def thresholding(image):
-    return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-
-def remove_noise(image):
-    "noise removal"
-    image = cv2.GaussianBlur(image, (5, 5), 0)
-    # image = cv2.medianBlur(image, 9)
-    return cv2.bilateralFilter(image, 9, 65, 75)
-
-
-def get_grayscale(image):
-    "get grayscale image"
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-
 def make_text(a, b):
     if (a[len(a)-1] == ')'):
         return a + '\n\n' + b
     return a + ' ' + b
 
 
-def read_text_new(image_data, ocr):
-    processed = preprocess(image_data)
+def read_text_multimodal(image_data, ocr):
+    '''
+    Extract the text from the given image using multiple OCR models
 
-    # print(pytesseract.image_to_data(processed, config=custom_config))
-    # print(reader.readtext(processed)[-2:-1])
+    Parameters: 
+    image_data: The image data array (ndarray)
+    ocr: Type of ocr model to perform (string)
+
+    Return:
+    clues: An array of clues with their text, number, lengths
+    '''
+
+    processed = preprocess(image_data)
 
     if ocr == "tesseract":
         custom_config = r"--oem 3 --psm 6"
@@ -119,33 +87,6 @@ def read_text_new(image_data, ocr):
         processed, config=custom_config, output_type='data.frame')
     text = [tuple(x) for x in text[text.conf != -1]
             [['conf', 'text']].to_numpy()]
-    # lines = text.groupby(['page_num', 'block_num', 'par_num', 'line_num'])['text'] \
-    #                                     .apply(lambda x: ' '.join(list(x))).tolist()
-    # confs = text.groupby(['page_num', 'block_num', 'par_num', 'line_num'])['conf'].mean().tolist()
-    # line_conf = []
-    # for i in range(len(lines)):
-    #     if lines[i].strip():
-    #         line_conf.append((lines[i], round(confs[i],3)))
-    # print("Lines")
-    # for i in line_conf:
-    #     print(i)
-    print(text)
-
-    text = pytesseract.image_to_string(processed, config=custom_config)
-    preprocessed_text = postprocess_text(text)
-    clues = parse_ocr(preprocessed_text)
-    return clues
-
-
-def read_text_original(image_data):
-
-    processed = preprocess_original(image_data)
-
-    custom_config = r"--oem 3 --psm 6"
-    text = pytesseract.image_to_data(
-        processed, config=custom_config, output_type='data.frame')
-
-    text = text[text.conf > 0]
     lines = text.groupby(['page_num', 'block_num', 'par_num', 'line_num'])['text'] \
         .apply(lambda x: ' '.join(list(x))).tolist()
     confs = text.groupby(['page_num', 'block_num', 'par_num', 'line_num'])[
@@ -226,15 +167,36 @@ def read_text(image_data):
     Return:
     clues: An array of clues with their text, number, lengths
     '''
-    image_data = transform_text_image(image_data)
-    gray = get_grayscale(image_data)
+    transformed = transform_text_image(image_data)
+    gray = preprocess_original(transformed)
 
     custom_config = r"--oem 3 --psm 6"
     text = pytesseract.image_to_string(gray, config=custom_config)
-    preprocessed_text = postprocess_text(text)
-    clues = parse_ocr(preprocessed_text)
+    postprocessed_text = postprocess_text(text)
+    clues = parse_ocr(postprocessed_text)
 
     return clues
+
+
+def distance_transform(image):
+    return cv2.distanceTransform(image, cv2.DIST_L2, 5)
+
+
+def adaptive_thresholding(image):
+    return cv2.adaptiveThreshold(image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 71, 6)
+
+
+def thresholding(image):
+    return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+
+def remove_noise(image):
+    image = cv2.GaussianBlur(image, (5, 5), 0)
+    return cv2.bilateralFilter(image, 9, 65, 75)
+
+
+def get_grayscale(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
 def get_int(word):
@@ -255,28 +217,8 @@ def get_int(word):
 
     return int(result)
 
-# Thresholding
-
-
-def thresholding(image):
-    return cv2.threshold(image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-# Noise removal
-
-
-def remove_noise(image):
-    return cv2.medianBlur(image, 5)
-
-# Get grayscale image
-
-
-def get_grayscale(image):
-    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
 
 if __name__ == "__main__":
-    import sys
-    pd.set_option("display.max_rows", 10001)
     img = cv2.imread("inputs/pics/clear/across1.jpg")
-    print(read_text_original(img))
     print(read_text(img))
+    print(read_text_multimodal(img))
