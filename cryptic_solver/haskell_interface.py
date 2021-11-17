@@ -44,13 +44,13 @@ def hs_solve_with_answer(clue, word_length, answer, explain=True):
 
 
 def hs_solve_with_pattern(clue, word_length, pattern):
-    return call_haskell("All", clue, word_length, explain=explain)
+    return call_haskell("All", clue, word_length)
 
 
 def hs_solve_with_cands(clue, word_length, candidates):
     cand_string = candidates.reduce(lambda a, b: a + "," + b)
 
-    return call_haskell("WithAnswers", clue, word_length, explain=explain, cand_string=cand_string)
+    return call_haskell("WithAnswers", clue, word_length, cand_string=cand_string)
 
 
 def call_haskell(mode, clue, word_length, explain=False, answer="", cand_string=""):
