@@ -1,7 +1,6 @@
 import pytesseract
 import cv2
 import re
-# !!! Tesseract cmd not set 
 
 def preprocess_text(text):
     '''
