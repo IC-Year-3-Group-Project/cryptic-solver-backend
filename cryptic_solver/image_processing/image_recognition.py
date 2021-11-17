@@ -22,13 +22,13 @@ def recognize_image(b64_grid, b64_across, b64_down, ocr="tesseract"):
       for grid_clue in grid_clues:
           if grid_clue["direction"] == 1 and grid_clue["number"] == clue.get("number", -1):
             grid_clue["text"] = clue.get("text", "NOT_RECOGNIZED_CORRECTLY")
-            grid_clue["lengths"] = list(map(int, clue.get("lengths", [0])))
+            grid_clue["lengths"] = list(map(lambda x: int(x) if x else [0], clue.get("lengths", [0])))
 
     for clue in across_dict:
       for grid_clue in grid_clues:
           if grid_clue["direction"] == 0 and grid_clue["number"] == clue.get("number", -1):
             grid_clue["text"] = clue.get("text", "NOT_RECOGNIZED_CORRECTLY")
-            grid_clue["lengths"] = list(map(int, clue.get("lengths", [0])))
+            grid_clue["lengths"] = list(map(lambda x: int(x) if x else [0], clue.get("lengths", [0])))
 
     grid_dict["clues"].sort(key=lambda c: c["number"])
 

@@ -4,6 +4,7 @@ import cv2
 import re
 from functools import reduce
 from easyocr import Reader 
+from cryptic_solver.image_processing.transform_image import transform_text_image
 
 
 reader = easyocr.Reader(['en'])
@@ -52,7 +53,7 @@ def remove_noise(image):
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-def read_text(image_data, ocr):
+def read_text_new(image_data, ocr):
 
     processed = preprocess(image_data)
 
@@ -139,6 +140,7 @@ def read_text(image_data):
     Return:
     clues: An array of clues with their text, number, lengths
     '''
+    image_data = transform_text_image(image_data)
     gray = get_grayscale(image_data)
 
     custom_config = r"--oem 3 --psm 6"
