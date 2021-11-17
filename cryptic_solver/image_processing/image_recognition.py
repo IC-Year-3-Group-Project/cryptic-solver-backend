@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 import base64
-from cryptic_solver.image_recognition.grid_recognition import get_grid_from_image
-from cryptic_solver.image_recognition.text_recognition import read_text
+from cryptic_solver.image_processing.grid_recognition import get_grid_from_image
+from cryptic_solver.image_processing.text_recognition import read_text
 
 # Combine grid and text recognition to produce one 
 # object with all crossword data
