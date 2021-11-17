@@ -40,10 +40,3 @@ def call_unlikely(clue, solution_pattern, letter_pattern=""):
     r = requests.get(url=fullURL)
 
     return r
-
-if __name__ == "__main__":
-    clue = "Peeling paint, profit slack, upset, in a state"
-    solution_pattern = "(10)"
-    r = unlikely_solve_clue(clue, solution_pattern)
-
-    print(r.text)

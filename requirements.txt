@@ -13,6 +13,7 @@ charset-normalizer==2.0.7
 constantly==15.1.0
 cryptography==3.4.7
 cycler==0.11.0
+Cython==0.29.24
 daphne==3.0.2
 defusedxml==0.7.1
 Django==3.2.9
@@ -20,6 +21,7 @@ django-cors-headers==3.10.0
 easyocr==1.4.1
 extruct==0.12.0
 fonttools==4.28.1
+ffmpeg==1.4
 gunicorn==20.1.0
 html-text==0.5.2
 html5lib==1.1
@@ -27,6 +29,7 @@ httplib2==0.19.1
 hyperlink==21.0.0
 idna==3.3
 imageio==2.9.0
+imutils==0.5.4
 incremental==21.3.0
 isodate==0.6.0
 jstyleson==0.0.2
@@ -45,6 +48,7 @@ protobuf==3.17.3
 psycopg2-binary==2.8.6
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
+pycodestyle==2.8.0
 pycparser==2.20
 pyOpenSSL==21.0.0
 pyparsing==2.4.7
@@ -73,6 +77,11 @@ tifffile==2021.11.2
 tomli==1.2.2
 torch==1.10.0
 torchvision==0.11.1
+service-identity==21.1.0
+six==1.16.0
+soupsieve==2.3
+sqlparse==0.4.2
+toml==0.10.2
 Twisted==21.7.0
 txaio==21.2.1
 typing-extensions==3.10.0.0
@@ -81,4 +90,5 @@ urllib3==1.26.7
 w3lib==1.22.0
 webencodings==0.5.1
 whitenoise==5.2.0
+channels==3.0.4
 zope.interface==5.4.0

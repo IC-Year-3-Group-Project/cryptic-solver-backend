@@ -2,14 +2,14 @@ from cryptic_solver.helper import *
 import unittest
 
 class MatchingTests(unittest.TestCase):
-    def testOneSolution(self):
+    def test_one_solution(self):
         pattern = {0: 'A', 2:'E', 4:'A'} #A_E_A__
         list = ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY']
 
         self.assertEqual(matching(pattern, list), ['AVERAGE'])
 
 
-    def testMoreSolutions(self):
+    def test_more_solutions(self):
         pattern = {0: 'B', 2:'B', 4:'E'} #B_B_E_
         list = ['BABBLE', 'BABIED', 'BABIES', 'BABOON']
 
@@ -17,16 +17,16 @@ class MatchingTests(unittest.TestCase):
 
 
 class MakeListTests(unittest.TestCase):
-    def testWithOneSolution(self):
+    def test_with_one_solution(self):
         text = "[AVERAGE]"
 
-        self.assertEqual(makeList(text), ["AVERAGE"])
+        self.assertEqual(make_list(text), ["AVERAGE"])
 
 
-    def testWithManySolutions(self):
+    def test_with_many_solutions(self):
         text = "['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY']"
 
-        self.assertEqual(makeList(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
+        self.assertEqual(make_list(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
 
 if __name__ == '__main__':
     unittest.main()
