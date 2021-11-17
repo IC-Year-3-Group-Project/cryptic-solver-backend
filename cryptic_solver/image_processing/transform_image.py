@@ -52,26 +52,32 @@ def thicken_black_contours(cv2_img, neighbourhood_size=4):
             if not black_treshold(r, g, b):
                 pix2[x, y] = (255, 255, 255)
 
-    img2.save("out/black.png")
     return img2
 
 
-def sort_points(pts):
+def sort_points(points):
+    """
+    Order the corners of the picture from top-left to bottom-left
 
-    pts = np.array([pts[i][0] for i in range(4)])
-    rect = np.zeros((4, 2), dtype="float32")
+    Parameters:
+    points: (ndarray)
 
-    s = pts.sum(axis=1)
-    rect[0] = pts[np.argmin(s)]
-    rect[2] = pts[np.argmax(s)]
+    Return:
+    ordered: (ndarray)
+    """
 
-    diff = np.diff(pts, axis=1)
-    rect[1] = pts[np.argmin(diff)]
-    rect[3] = pts[np.argmax(diff)]
+    points = np.array([points[i][0] for i in range(4)])
+    ordered = np.zeros((4, 2), dtype="float32")
 
-    # return the ordered coordinates
-    print(rect)
-    return rect
+    sum = points.sum(axis=1)
+    ordered[0] = points[np.argmin(sum)]
+    ordered[2] = points[np.argmax(sum)]
+
+    diff = np.diff(points, axis=1)
+    ordered[1] = points[np.argmin(diff)]
+    ordered[3] = points[np.argmax(diff)]
+
+    return ordered
 
 
 def transform_to_cornersangle(image, points):
@@ -91,11 +97,6 @@ def transform_to_cornersangle(image, points):
     # Get the array of 4 corners of the grid and move a bit towards
     # the corners of the whole image to allow for some white space
     # around the image after cropping
-
-    # corners = np.array(
-    #     [points[0][0], points[3][0], points[2][0], points[1][0]], dtype="float32"
-    # )
-
     corners = sort_points(points)
 
     corners[0][0] -= 50
@@ -111,7 +112,6 @@ def transform_to_cornersangle(image, points):
     corners[3][1] += 50
 
     (tl, tr, br, bl) = corners
-    print(corners)
 
     # Use the Pythagorean Theorem to find the approximate sides of the
     # tilted grid so that we can use them later to keep the same size
@@ -141,7 +141,7 @@ def process_grid_image(cv2_img):
     with sides parallel and perpendicular to the horizontal
 
     Parameters:
-    path: The path tho the image
+    path: The path to the image
 
     Return:
     rectangular_image: The image with non-tilted grid inside
@@ -163,8 +163,6 @@ def process_grid_image(cv2_img):
     blur = cv2.GaussianBlur(thresh, (5, 5), 0)
     edged = cv2.Canny(blur, 75, 200)
 
-    cv2.imwrite("out/edged.png", blur)
-
     # Find the contours and extract the 5 longest contours
     contours = cv2.findContours(blur.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     contours = imutils.grab_contours(contours)
@@ -179,23 +177,23 @@ def process_grid_image(cv2_img):
             corners = approx_corners
             break
 
-    print(corners[0])
-
-    cv2.drawContours(image, [corners], -1, (0, 255, 0), 2)
-    cv2.imwrite("out/out.png", image)
-
     corner_points = corners * np.shape(original_image)[0] / (1.0 * resize_height)
-
-    print(corner_points)
     rectangular_image = transform_to_cornersangle(original_image, corner_points)
-    cv2.imwrite("out/warped.png", rectangular_image)
 
     return rectangular_image
 
 
-# Takes a cv2 image
 def transform_text_image(image):
-    print(pytesseract.image_to_osd(image))
+    """
+    Transforms a tilted text image
+
+    Parameters:
+    image: Array of image data
+
+    Return:
+    rotated: The rotated image
+    """
+    
     angle = 360 - int(
         re.search("(?<=Rotate: )\d+", pytesseract.image_to_osd(image)).group(0)
     )
@@ -205,5 +203,4 @@ def transform_text_image(image):
     M = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1.0)
     rotated = cv2.warpAffine(image, M, (width, height))
 
-    cv2.imwrite("out/rotated.png", rotated)
     return rotated
