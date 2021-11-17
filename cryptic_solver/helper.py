@@ -47,7 +47,7 @@ def matching(pattern, responses):
             result.append(response)
     return result
 
-def makeList(text):
+def make_list(text):
     """
     Converts the raw text output from the Haskell server into a Python list for
     packaging into a JSON format.
@@ -63,7 +63,7 @@ def makeList(text):
     text = text.translate({ord(i): None for i in '[]\"\' '})
     return text.split(',')
 
-def getCandidates(pattern, word_length):
+def get_candidates(pattern, word_length):
     """
     Finds all possible words matching the given pattern and length
 
@@ -83,7 +83,7 @@ def getCandidates(pattern, word_length):
         english_dict = load_words()
     return matching(pattern, english_dict.get(word_length))
 
-def getExplanation(response_text):
+def get_explanation(response_text):
     """
     Extracts the explanation given by the Haskell code from a HTTP response from the server.
 

@@ -52,7 +52,7 @@ def solve_clue(request):
         word_length = data["word_length"]
         response = hs_solve_clue(clue, word_length)
 
-        solution = makeList(response.text)
+        solution = make_list(response.text)
 
         return JsonResponse(solution, safe=False)
 
@@ -75,7 +75,7 @@ def unlikely_solve_clue(request):
         else:
             response = hs_solve_clue(clue, word_length)
 
-            solution = makeList(response.text)
+            solution = make_list(response.text)
 
             return JsonResponse(solution, safe=False)
 
@@ -130,7 +130,7 @@ def solve_with_pattern(request):
 
         response = hs_solve_with_pattern(clue, word_length)
 
-        solutions = makeList(response.text)
+        solutions = make_list(response.text)
 
         return JsonResponse(matching(pattern, solutions), safe=False)
 
@@ -179,11 +179,11 @@ def solve_with_dict(request):
         word_length = json.loads(request.body)['word_length']
         clue = json.loads(request.body)['clue']
 
-        cands = getCandidates(pattern, word_length)
+        cands = get_candidates(pattern, word_length)
 
         response = hs_solve_with_cands(clue, cands)
 
-        solutions = makeList(response.text)
+        solutions = make_list(response.text)
 
         return JsonResponse(solutions, safe=False)
 
@@ -199,7 +199,7 @@ def explain_answer(request):
 
         response = hs_solve_with_answer(clue, word_length, answer, explain=True)
 
-        explanation = getExplanation(response.text)
+        explanation = get_explanation(response.text)
 
         return JsonResponse(explanation, safe=False)
 
