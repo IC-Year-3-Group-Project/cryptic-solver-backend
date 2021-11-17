@@ -16,7 +16,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.x' 
+          python-version: '3.x'
+      - run: pip install torch==1.8.1+cu111 -f https://download.pytorch.org/whl/torch_stable.html
       - run: pip install -r requirements.txt
       - run: python manage.py migrate
       - run: python manage.py test
