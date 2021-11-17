@@ -5,7 +5,7 @@ import re
 import numpy as np
 import pandas as pd
 from functools import reduce
-
+from cryptic_solver.image_processing.transform_image import transform_text_image
 # from cryptic_solver_project import settings
 
 # if settings.tesseract_cmd != "":
@@ -15,6 +15,11 @@ from functools import reduce
 
 reader = easyocr.Reader(['en'])
 
+def preprocess_original(image):
+    image = get_grayscale(image)
+    cv2.imwrite('thresh.png', image)
+    return image
+
 
 def preprocess(image):
     gray = get_grayscale(image)
@@ -22,9 +27,6 @@ def preprocess(image):
     # image = adaptive_thresholding(image)
     thresh = thresholding(blurred)
     # image = distance_transform(image)
-    # image = cv2.normalize(image, image, 0, 1.0, cv2.NORM_MINMAX)
-    # image = adaptive_thresholding(image)
-    # image = remove_noise(image)
 
     cv2.imwrite('gray.png', gray)
     cv2.imwrite('blurred.png', blurred)
@@ -34,13 +36,7 @@ def preprocess(image):
     return image
 
 
-def preprocess_original(image):
-    image = get_grayscale(image)
-    cv2.imwrite('thresh.png', image)
-    return image
-
-
-def preprocess_text(text):
+def postprocess_text(text):
     '''
     Changes the misrecognized characters to the expected ones
 
@@ -100,6 +96,12 @@ def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
 
+def make_text(a, b):
+    if (a[len(a)-1] == ')'):
+        return a + '\n\n' + b
+    return a + ' ' + b
+
+
 def read_text_new(image_data, ocr):
     processed = preprocess(image_data)
 
@@ -130,7 +132,7 @@ def read_text_new(image_data, ocr):
     print(text)
 
     text = pytesseract.image_to_string(processed, config=custom_config)
-    preprocessed_text = preprocess_text(text)
+    preprocessed_text = postprocess_text(text)
     clues = parse_ocr(preprocessed_text)
     return clues
 
@@ -157,15 +159,9 @@ def read_text_original(image_data):
         print(i)
 
     text = pytesseract.image_to_string(processed, config=custom_config)
-    preprocessed_text = preprocess_text(text)
+    preprocessed_text = postprocess_text(text)
     clues = parse_ocr(preprocessed_text)
     return clues
-
-
-def make_text(a, b):
-    if (a[len(a)-1] == ')'):
-        return a + '\n\n' + b
-    return a + ' ' + b
 
 
 def parse_ocr(text):
@@ -235,7 +231,7 @@ def read_text(image_data):
 
     custom_config = r"--oem 3 --psm 6"
     text = pytesseract.image_to_string(gray, config=custom_config)
-    preprocessed_text = preprocess_text(text)
+    preprocessed_text = postprocess_text(text)
     clues = parse_ocr(preprocessed_text)
 
     return clues
@@ -281,6 +277,6 @@ def get_grayscale(image):
 if __name__ == "__main__":
     import sys
     pd.set_option("display.max_rows", 10001)
-    img = cv2.imread("pics/clear/across1.jpg")
+    img = cv2.imread("inputs/pics/clear/across1.jpg")
     print(read_text_original(img))
     print(read_text(img))
