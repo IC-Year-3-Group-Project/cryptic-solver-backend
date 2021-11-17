@@ -5,16 +5,13 @@ from django.http import response
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
 from django.views.decorators.csrf import csrf_exempt
-from cryptic_solver.grid_recognition import get_grid_as_json, get_grid_from_image
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
 from cryptic_solver.image_recognition import recognize_image
 from cryptic_solver.unlikely_interface import *
-from cryptic_solver.text_recognition import read_text
 import requests
 import re
 import html
-import hashlib
 import numpy as np
 
 from bs4 import BeautifulSoup
@@ -214,7 +211,7 @@ def fetch_everyman(request):
 
         # Use set to avoid returning duplicate links
         urls = set()
-        #  Filter throuhg for everyman crossword links
+        #  Filter through for everyman crossword links
         for link in soup.find_all("a"):
             l = link.get("href")
             if (
@@ -232,16 +229,16 @@ def process_puzzle(request):
         return option_response()
     else:
         json_object = json.loads(request.body)
-        b64_grid_image = json_object['grid']
 
+        # all images are sent over in base 64
+        b64_grid_image = json_object['grid']
         b64_across_image = json_object['across']
         b64_down_image = json_object['down']
 
-        mobile = json_object['mobile']
+        # get json grid containing the structure + all clues
+        grid = recognize_image(b64_grid_image, b64_across_image, b64_down_image, ocr="tesseract")
 
-        grid = recognize_image(b64_grid_image, b64_across_image, b64_down_image)
-
-        # TODO populate grid with clues using OCR
+        # insert grid into database
         puzzle = Puzzle.objects.create(grid_json=grid)
         puzzle.save()
 
@@ -255,7 +252,8 @@ def get_puzzle(request):
         json_object = json.loads(request.body)
         id = json_object['id']
 
-        if (len(Puzzle.objects.filter(id=id)) == 0):
+        # return empty grid if we dont have the puzzle
+        x = Puzzle.objects.filter(id=id)
+        if (len(x) == 0):
             return JsonResponse({"grid": {}})
-
-        return JsonResponse({"grid": Puzzle.objects.filter(id=id).get().grid_json})
+        return JsonResponse({"grid": x.get().grid_json})

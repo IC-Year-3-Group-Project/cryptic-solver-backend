@@ -205,7 +205,7 @@ def write_clue(grid, clues, j, k, direction):
         clues.append({
             "number": grid[j][k]["clue_number"],
             "direction": direction_number,
-            "text": "TODO",
+            "text": "OCR DID NOT PICK UP CLUE",
             "totalLength": grid[j][k][direction],
             "lengths": [grid[j][k][direction]],
             "x": k,

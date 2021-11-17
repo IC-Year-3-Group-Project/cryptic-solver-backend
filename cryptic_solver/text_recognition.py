@@ -1,11 +1,16 @@
+import easyocr
 import pytesseract
 import cv2
 import re
+from functools import reduce
+from easyocr import Reader 
 
 from cryptic_solver_project import settings
 
 if settings.tesseract_cmd != "":
     pytesseract.pytesseract.tesseract_cmd = settings.tesseract_cmd
+
+reader = easyocr.Reader(['en'])
 
 def preprocess(image):
 
@@ -46,15 +51,30 @@ def remove_noise(image):
 def get_grayscale(image):
     return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-def read_text(image_data):
+def read_text(image_data, ocr):
 
     processed = preprocess(image_data)
 
     custom_config = r"--oem 3 --psm 6"
-    text = pytesseract.image_to_string(processed, config=custom_config)
+
+    # print(pytesseract.image_to_data(processed, config=custom_config))
+    # print(reader.readtext(processed)[-2:-1])
+
+    if ocr == "tesseract":
+        text = pytesseract.image_to_string(processed, config=custom_config)
+    elif ocr == "easy_ocr":
+        text = reader.readtext(processed, detail=0)
+        text = reduce(make_text, text)
+
     preprocessed_text = preprocess_text(text)
     clues = parse_ocr(preprocessed_text)
     return clues
+
+def make_text(a, b):
+    if (a[len(a)-1] == ')'):
+        return a + '\n\n' + b
+    return a + ' ' + b
+
 
 def parse_ocr(text):
 
