@@ -2,8 +2,6 @@ import pytesseract
 import cv2
 import re
 import easyocr
-from functools import reduce
-# TODO change when merged to master
 if __name__ != "__main__":
     from cryptic_solver.image_processing.transform_image import transform_text_image
 
@@ -127,8 +125,6 @@ def read_text_multimodal(image_data, ocr):
 
         # Parse into clues: number, length, text and conf
         clues = parse_ocr_with_conf(postprocessed_text)
-
-        print("\n\nRead Text Original\n")
     elif ocr == "tesseract":
         # Preprocessing
         processed = preprocess(image_data)
@@ -144,8 +140,6 @@ def read_text_multimodal(image_data, ocr):
 
         # Parse into clues
         clues = parse_ocr_with_conf(postprocessed_text)
-
-        print("\n\nRead Text New Preprocess\n")
     elif ocr == "easy_ocr":
         # Preprocessing
         processed = preprocess(image_data)
@@ -168,8 +162,6 @@ def read_text_multimodal(image_data, ocr):
 
         # Parse into clues
         clues = parse_ocr_with_conf(postprocessed_text)
-
-        print("\n\nRead Text Easy OCR\n")
     return clues
 
 
@@ -250,11 +242,12 @@ def parse_ocr_with_conf(text):
     line_builder = []
     last_line_no = 1
     for i, (string, conf, line_no) in enumerate(text):
+        no_of_strings += 1
+        total_conf += conf
+        
         # if not gone onto new line or reached last parsed text
         if not (line_no != last_line_no or i == len(text)-1):
             line_builder.append(string)
-            total_conf += conf
-            no_of_strings += 1
             continue
 
         last_line_no = line_no
@@ -291,7 +284,7 @@ def parse_ocr_with_conf(text):
         clue_text += " " + " ".join(words)
 
     clue["text"] = clue_text.strip()
-    clue["conf"] = round(total_conf / no_of_strings, 3)
+    clue["conf"] = round(total_conf / no_of_strings, 3) if no_of_strings > 0 else 0.01
     clues.append(clue)
     return clues
 
@@ -312,8 +305,7 @@ def read_text(image_data):
         new_clues = read_text_multimodal(image_data, ocr)
         if best_clues: # if we have best_clues to compare with
             for clue in new_clues:
-                print(clue)
-                print()
+
                 if "number" in clue and clue['conf'] > 42:
                     if clue['number'] in best_clues:
                         if best_clues[clue['number']]['conf'] < clue['conf']:
@@ -322,8 +314,7 @@ def read_text(image_data):
                         best_clues[clue['number']] = clue
         else:
             for clue in new_clues:
-                print(clue)
-                print()
+
                 if "number" in clue and clue['conf'] > 42:
                     best_clues[clue['number']] = clue
 
@@ -372,9 +363,6 @@ def get_int(word):
 
 if __name__ == "__main__":
     from transform_image import transform_text_image
-    img = cv2.imread("inputs/pics/clear/across1.jpg")
-    # print(read_text_multimodal(img, "original"))
-    # print(read_text_multimodal(img, "tesseract"))
-    # print(read_text_multimodal(img, "easy_ocr"))
+    img = cv2.imread("inputs/3across.jpeg")
     
     print(read_text(img))
