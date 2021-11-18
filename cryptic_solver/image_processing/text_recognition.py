@@ -306,7 +306,28 @@ def read_text(image_data):
     Return:
     clues: An array of clues with their text, number, lengths
     '''
-    return read_text_multimodal(image_data, "original")
+    ocrs = ["original", "tesseract", "easy_ocr"]
+    best_clues = dict()
+    for ocr in ocrs:
+        new_clues = read_text_multimodal(image_data, ocr)
+        if best_clues: # if we have best_clues to compare with
+            for clue in new_clues:
+                print(clue)
+                print()
+                if "number" in clue and clue['conf'] > 42:
+                    if clue['number'] in best_clues:
+                        if best_clues[clue['number']]['conf'] < clue['conf']:
+                            best_clues[clue['number']] = clue
+                    else:
+                        best_clues[clue['number']] = clue
+        else:
+            for clue in new_clues:
+                print(clue)
+                print()
+                if "number" in clue and clue['conf'] > 42:
+                    best_clues[clue['number']] = clue
+
+    return list(best_clues.values())
 
 
 def distance_transform(image):
@@ -352,6 +373,8 @@ def get_int(word):
 if __name__ == "__main__":
     from transform_image import transform_text_image
     img = cv2.imread("inputs/pics/clear/across1.jpg")
-    print(read_text_multimodal(img, "original"))
-    print(read_text_multimodal(img, "tesseract"))
-    print(read_text_multimodal(img, "easy_ocr"))
+    # print(read_text_multimodal(img, "original"))
+    # print(read_text_multimodal(img, "tesseract"))
+    # print(read_text_multimodal(img, "easy_ocr"))
+    
+    print(read_text(img))
