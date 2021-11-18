@@ -28,7 +28,7 @@ def postprocess_text(text):
     '''
     Changes the misrecognized characters to the expected ones
 
-    Parameters: 
+    Parameters:
     text: String
 
     Return:
@@ -60,7 +60,7 @@ def postprocess_text_with_conf(text):
     '''
     Changes the misrecognized characters to the expected ones
 
-    Parameters: 
+    Parameters:
     text: String
 
     Return:
@@ -102,7 +102,7 @@ def read_text_multimodal(image_data, ocr):
     '''
     Extract the text from the given image using multiple OCR models
 
-    Parameters: 
+    Parameters:
     image_data: The image data array (ndarray)
     ocr: Type of ocr model to perform (string)
 
@@ -151,7 +151,7 @@ def read_text_multimodal(image_data, ocr):
         processed = preprocess(image_data)
 
         # OCR processing
-        text = [x[-2:] + tuple([[x[0][0][1], x[0][2][1]]])
+        text = [(x[-2], 10*x[-1], ([x[0][0][1], x[0][2][1]]))
                 for x in reader.readtext(processed)]
         text_with_line_no = []
         last_topdown = (-2, -1)
@@ -191,10 +191,10 @@ def parse_ocr(text):
     """
     Extract the clues from a given text
     The idea:
-        - when a line starts with a number, it"s a new clue 
+        - when a line starts with a number, it"s a new clue
           (add the currently building clue to clues, make a new one)
         - all text past that is the actual clue
-        - if line ends with a number (excluding brackets) 
+        - if line ends with a number (excluding brackets)
           then that line ending is the solution pattern
         - replace . with ,
 
@@ -202,7 +202,7 @@ def parse_ocr(text):
     text: String
 
     Return:
-    clues: An array of clues with their text, number, lengths    
+    clues: An array of clues with their text, number, lengths
     """
 
     clues = []
@@ -243,6 +243,8 @@ def parse_ocr_with_conf(text):
     clues = []
     clue = {}
     clue_text = ""
+    total_conf = 0
+    no_of_strings = 0
 
     line = ""
     line_builder = []
@@ -251,6 +253,8 @@ def parse_ocr_with_conf(text):
         # if not gone onto new line or reached last parsed text
         if not (line_no != last_line_no or i == len(text)-1):
             line_builder.append(string)
+            total_conf += conf
+            no_of_strings += 1
             continue
 
         last_line_no = line_no
@@ -268,9 +272,12 @@ def parse_ocr_with_conf(text):
         if re.match(r"\d+.*", words[0]) and len(words) > 1:
             if clue:
                 clue["text"] = clue_text.strip()
+                clue["conf"] = round(total_conf / no_of_strings, 3)
                 clues.append(clue)
             clue = {}
             clue_text = ""
+            total_conf = 0
+            no_of_strings = 0
             clue["number"] = get_int(words[0])
             del words[0]
 
@@ -284,6 +291,7 @@ def parse_ocr_with_conf(text):
         clue_text += " " + " ".join(words)
 
     clue["text"] = clue_text.strip()
+    clue["conf"] = round(total_conf / no_of_strings, 3)
     clues.append(clue)
     return clues
 
