@@ -5,6 +5,19 @@ from cryptic_solver.image_processing.grid_recognition import get_grid_from_image
 from cryptic_solver.image_processing.text_recognition import read_text
 
 
+def get_length(string):
+    try:
+        only_numbers = []
+        for ch in string:
+            if ch.isdigit():
+                only_numbers.append(ch)
+        if not only_numbers or len(only_numbers) == 0:
+            return ["0"]
+        return int("".join(only_numbers))
+    except:
+        return ["0"]
+
+
 def recognize_image(b64_grid, b64_across, b64_down, ocr="tesseract"):
     """
     Combine grid and text recognition to produce one
@@ -23,17 +36,19 @@ def recognize_image(b64_grid, b64_across, b64_down, ocr="tesseract"):
 
     for clue in down_dict:
         for grid_clue in grid_clues:
-            if grid_clue["direction"] == 1 and grid_clue["number"] == clue.get("number", -1):
+            if grid_clue["direction"] == 1 and grid_clue["number"] == clue.get(
+                "number", -1
+            ):
                 grid_clue["text"] = clue.get("text", "TODO")
-                grid_clue["lengths"] = list(
-                    map(lambda x: int(x) if x else [0], clue.get("lengths", [0])))
+                grid_clue["lengths"] = list(map(get_length, clue.get("lengths", ["0"])))
 
     for clue in across_dict:
         for grid_clue in grid_clues:
-            if grid_clue["direction"] == 0 and grid_clue["number"] == clue.get("number", -1):
+            if grid_clue["direction"] == 0 and grid_clue["number"] == clue.get(
+                "number", -1
+            ):
                 grid_clue["text"] = clue.get("text", "TODO")
-                grid_clue["lengths"] = list(
-                    map(lambda x: int(x) if x else [0], clue.get("lengths", [0])))
+                grid_clue["lengths"] = list(map(get_length, clue.get("lengths", ["0"])))
 
     grid_dict["clues"].sort(key=lambda c: c["number"])
 
