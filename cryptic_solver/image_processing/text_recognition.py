@@ -1,11 +1,11 @@
 import pytesseract
 import cv2
 import re
-import easyocr
+# import easyocr
 if __name__ != "__main__":
     from cryptic_solver.image_processing.transform_image import transform_text_image
 
-reader = easyocr.Reader(['en'])
+# reader = easyocr.Reader(['en'])
 
 
 def preprocess_original(image):
@@ -140,28 +140,28 @@ def read_text_multimodal(image_data, ocr):
 
         # Parse into clues
         clues = parse_ocr_with_conf(postprocessed_text)
-    elif ocr == "easy_ocr":
-        # Preprocessing
-        processed = preprocess(image_data)
+    # elif ocr == "easy_ocr":
+    #     # Preprocessing
+    #     processed = preprocess(image_data)
 
-        # OCR processing
-        text = [(x[-2], 10*x[-1], ([x[0][0][1], x[0][2][1]]))
-                for x in reader.readtext(processed)]
-        text_with_line_no = []
-        last_topdown = (-2, -1)
-        line_no = 0
-        for word, conf, curr_topdown in text:
-            if not sufficiently_overlap(last_topdown, curr_topdown):
-                line_no += 1
-            text_with_line_no.append((word, conf, line_no))
-            last_topdown = curr_topdown
-        text = text_with_line_no
+    #     # OCR processing
+    #     text = [(x[-2], 10*x[-1], ([x[0][0][1], x[0][2][1]]))
+    #             for x in reader.readtext(processed)]
+    #     text_with_line_no = []
+    #     last_topdown = (-2, -1)
+    #     line_no = 0
+    #     for word, conf, curr_topdown in text:
+    #         if not sufficiently_overlap(last_topdown, curr_topdown):
+    #             line_no += 1
+    #         text_with_line_no.append((word, conf, line_no))
+    #         last_topdown = curr_topdown
+    #     text = text_with_line_no
 
-        # Postprocessing
-        postprocessed_text = postprocess_text_with_conf(text)
+    #     # Postprocessing
+    #     postprocessed_text = postprocess_text_with_conf(text)
 
-        # Parse into clues
-        clues = parse_ocr_with_conf(postprocessed_text)
+    #     # Parse into clues
+    #     clues = parse_ocr_with_conf(postprocessed_text)
     return clues
 
 
@@ -299,7 +299,7 @@ def read_text(image_data):
     Return:
     clues: An array of clues with their text, number, lengths
     '''
-    ocrs = ["original", "tesseract", "easy_ocr"]
+    ocrs = ["original", "tesseract"]
     best_clues = dict()
     for ocr in ocrs:
         new_clues = read_text_multimodal(image_data, ocr)
