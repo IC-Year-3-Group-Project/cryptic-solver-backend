@@ -5,9 +5,6 @@ import PIL.Image
 import pytesseract
 import re
 
-# pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
-# !!! Tesseract command different on every machine
-
 
 def black_treshold(r, g, b):
     return r < 120 and g < 120 and b < 120
@@ -130,7 +127,8 @@ def transform_to_cornersangle(image, points):
     )
 
     transform_matrix = cv2.getPerspectiveTransform(corners, dst_corners)
-    rectangular_image = cv2.warpPerspective(image, transform_matrix, (width, height))
+    rectangular_image = cv2.warpPerspective(
+        image, transform_matrix, (width, height))
 
     return rectangular_image
 
@@ -159,12 +157,14 @@ def process_grid_image(cv2_img):
     # Turn to grayscale and perform Gaussian blur to find the
     # edges in the grid more easily
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    T, thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
+    T, thresh = cv2.threshold(
+        gray, 0, 255, cv2.THRESH_BINARY_INV | cv2.THRESH_OTSU)
     blur = cv2.GaussianBlur(thresh, (5, 5), 0)
     edged = cv2.Canny(blur, 75, 200)
 
     # Find the contours and extract the 5 longest contours
-    contours = cv2.findContours(blur.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    contours = cv2.findContours(
+        blur.copy(), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
     contours = imutils.grab_contours(contours)
     contours = sorted(contours, key=cv2.contourArea, reverse=True)[:5]
 
@@ -177,8 +177,10 @@ def process_grid_image(cv2_img):
             corners = approx_corners
             break
 
-    corner_points = corners * np.shape(original_image)[0] / (1.0 * resize_height)
-    rectangular_image = transform_to_cornersangle(original_image, corner_points)
+    corner_points = corners * \
+        np.shape(original_image)[0] / (1.0 * resize_height)
+    rectangular_image = transform_to_cornersangle(
+        original_image, corner_points)
 
     return rectangular_image
 
@@ -193,7 +195,7 @@ def transform_text_image(image):
     Return:
     rotated: The rotated image
     """
-    
+
     angle = 360 - int(
         re.search("(?<=Rotate: )\d+", pytesseract.image_to_osd(image)).group(0)
     )

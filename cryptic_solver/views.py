@@ -14,14 +14,14 @@ from cryptic_solver.image_processing.text_recognition import read_text
 import requests
 import re
 import html
-import hashlib
 import numpy as np
 
 from bs4 import BeautifulSoup
 
 from cryptic_solver.models import Puzzle
 
-allowed_crossword_prefixes = ["https://www.theguardian.com/crosswords/everyman"]
+allowed_crossword_prefixes = [
+    "https://www.theguardian.com/crosswords/everyman"]
 
 
 def option_response():
@@ -79,6 +79,7 @@ def unlikely_solve_clue(request):
 
             return JsonResponse(solution, safe=False)
 
+
 @csrf_exempt
 def solve_and_explain(request):
     if request.method == "OPTIONS":
@@ -94,7 +95,6 @@ def solve_and_explain(request):
         hs_solutions = []
         if hs_response.status_code == 200:
             hs_solutions = format_haskell_answers(hs_response.text)
-
 
         # Gather solutions from Unlikely solver
         solution_pattern = format_word_length(word_length)
@@ -161,6 +161,7 @@ def fetch_crossword(request):
         else:
             return HttpResponseServerError("Failed to fetch crossword data.")
 
+
 """
 {
   "word_length": 7,
@@ -168,6 +169,7 @@ def fetch_crossword(request):
   "clue": " "
 }
 """
+
 
 @csrf_exempt
 def solve_with_dict(request):
@@ -187,6 +189,7 @@ def solve_with_dict(request):
 
         return JsonResponse(solutions, safe=False)
 
+
 @csrf_exempt
 def explain_answer(request):
     if request.method == 'OPTIONS':
@@ -197,11 +200,13 @@ def explain_answer(request):
         word_length = json.loads(request.body)['word_length']
         clue = json.loads(request.body)['clue']
 
-        response = hs_solve_with_answer(clue, word_length, answer, explain=True)
+        response = hs_solve_with_answer(
+            clue, word_length, answer, explain=True)
 
         explanation = get_explanation(response.text)
 
         return JsonResponse(explanation, safe=False)
+
 
 @csrf_exempt
 def fetch_everyman(request):
@@ -214,7 +219,7 @@ def fetch_everyman(request):
 
         # Use set to avoid returning duplicate links
         urls = set()
-        #  Filter throuhg for everyman crossword links
+        #  Filter through for everyman crossword links
         for link in soup.find_all("a"):
             l = link.get("href")
             if (
@@ -232,20 +237,22 @@ def process_puzzle(request):
         return option_response()
     else:
         json_object = json.loads(request.body)
-        b64_grid_image = json_object['grid']
 
+        # all images are sent over in base 64
+        b64_grid_image = json_object['grid']
         b64_across_image = json_object['across']
         b64_down_image = json_object['down']
 
-        mobile = json_object['mobile']
+        # get json grid containing the structure + all clues
+        grid = recognize_image(
+            b64_grid_image, b64_across_image, b64_down_image, ocr="tesseract")
 
-        grid = recognize_image(b64_grid_image, b64_across_image, b64_down_image)
-
-        # TODO populate grid with clues using OCR
+        # insert grid into database
         puzzle = Puzzle.objects.create(grid_json=grid)
         puzzle.save()
 
         return JsonResponse({"id": puzzle.id, "grid": grid})
+
 
 @csrf_exempt
 def get_puzzle(request):
@@ -255,7 +262,8 @@ def get_puzzle(request):
         json_object = json.loads(request.body)
         id = json_object['id']
 
-        if (len(Puzzle.objects.filter(id=id)) == 0):
+        # return empty grid if we dont have the puzzle
+        x = Puzzle.objects.filter(id=id)
+        if (len(x) == 0):
             return JsonResponse({"grid": {}})
-
-        return JsonResponse({"grid": Puzzle.objects.filter(id=id).get().grid_json})
+        return JsonResponse({"grid": x.get().grid_json})
