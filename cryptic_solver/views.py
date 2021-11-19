@@ -187,7 +187,9 @@ def solve_with_dict(request):
 
         cands = get_candidates(pattern, word_length)
 
-        response = hs_solve_with_cands(clue, cands)
+        print(cands)
+
+        response = hs_solve_with_cands(clue, word_length, cands)
 
         solutions = make_list(response.text)
 
