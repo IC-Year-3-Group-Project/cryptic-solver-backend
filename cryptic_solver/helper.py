@@ -1,6 +1,7 @@
 import json
+from cryptic_solver.trie import Trie
 
-english_dict = {}
+english_dict = None
 
 def load_words():
     """
@@ -10,30 +11,20 @@ def load_words():
 
     A dict containing all words from words_alpha.txt
     """
-    dict = {}
+    trie = Trie()
     with open('cryptic_solver/words_alpha.txt') as word_file:
         for w in word_file.read().split():
-            length = len(w)
-            res = dict.get(length)
-            if (res == None):
-                dict.update({length: [w]})
-            else:
-                res.append(w)
-    return dict.copy()
+            trie.add(w)
+    return trie
 
 def matching(pattern, responses):
     """
     Filters a list of possible solutions based on known letters.
-
     Parameters:
-
     pattern: a dict with indexes mapped to a known letter at that index.
              For example, {1:'a', 3:'c', 5:'e'} corresponds to the pattern _A_C_E
-
     responses: a list of strings, all of which are potential solutions to the clue
-
     Returns:
-
     result: a list of the solutions from responses that match the given pattern
     """
     result = []
@@ -64,24 +55,22 @@ def make_list(text):
     return text.split(',')
 
 def get_candidates(pattern, word_length):
-    """
-    Finds all possible words matching the given pattern and length
 
-    Parameters:
 
-    pattern: a dict with indexes mapped to a known letter at that index.
-             For example, {1:'a', 3:'c', 5:'e'} corresponds to the pattern _A_C_E
+    search_string = ""
+    for i in range(word_length):
+        if str(i) in pattern:
+            search_string += str.lower(pattern[str(i)])
+        elif i in pattern:
+            search_string += str.lower(pattern[i])
+        else:
+            search_string += '_'   
 
-    word_length: the length of the solution
-
-    Returns:
-
-    A list of all the words in the dictionary from load_words that match the given pattern and are the right length
-    """
     global english_dict
-    if english_dict == {}:
-        english_dict = load_words()
-    return matching(pattern, english_dict.get(word_length))
+    if english_dict == None:
+        english_dict = load_words()     
+    result = english_dict.search(search_string)
+    return result
 
 def get_explanation(response_text):
     """
