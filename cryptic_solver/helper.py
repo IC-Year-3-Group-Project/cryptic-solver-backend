@@ -17,6 +17,27 @@ def load_words():
             trie.add(w)
     return trie
 
+def matching(pattern, responses):
+    """
+    Filters a list of possible solutions based on known letters.
+    Parameters:
+    pattern: a dict with indexes mapped to a known letter at that index.
+             For example, {1:'a', 3:'c', 5:'e'} corresponds to the pattern _A_C_E
+    responses: a list of strings, all of which are potential solutions to the clue
+    Returns:
+    result: a list of the solutions from responses that match the given pattern
+    """
+    result = []
+    for response in responses:
+        match = True
+        for k,v in pattern.items():
+            if (response[int(k)] != v):
+                match = False
+                break
+        if (match):
+            result.append(response)
+    return result
+
 def make_list(text):
     """
     Converts the raw text output from the Haskell server into a Python list for
@@ -34,17 +55,22 @@ def make_list(text):
     return text.split(',')
 
 def get_candidates(pattern, word_length):
+
+
     search_string = ""
     for i in range(word_length):
         if str(i) in pattern:
-            search_string += pattern[str(i)]
+            search_string += str.lower(pattern[str(i)])
+        elif i in pattern:
+            search_string += str.lower(pattern[i])
         else:
             search_string += '_'   
 
     global english_dict
     if english_dict == None:
-        english_dict = load_words()        
-    return english_dict.search(search_string)
+        english_dict = load_words()     
+    result = english_dict.search(search_string)
+    return result
 
 def get_explanation(response_text):
     """
