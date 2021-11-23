@@ -121,17 +121,37 @@ def solve_with_pattern(request):
     if request.method == "OPTIONS":
         return option_response()
     else:
+        # Get data from request
         data = json.loads(request.body)
         clue = data["clue"]
         word_length = data["word_length"]
         pattern = data["pattern"]
+        letter_pattern = data["letter_pattern"]
 
-        response = hs_solve_with_pattern(clue, word_length)
+        unlikely_solutions = []
+        hs_solutions = []
 
-        solutions = make_list(response.text)
+        # Gather solutions from Unlikely solver
+        unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
+        
+        if unlikely_response.status_code == 200:
+            data = json.loads(unlikely_response.text)
+            unlikely_solutions = parse_unlikely_with_explanations(data)
+            # Filter Unlikely solutions by the pattern
+            unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
 
-        return JsonResponse(matching(pattern, solutions), safe=False)
+        if not ("-" in pattern or "," in pattern):
+            # Gather solutions from Haskell solver
+            hs_response = hs_solve_and_explain_clue(clue, word_length)
+            
+            if hs_response.status_code == 200:
+                hs_solutions = format_haskell_answers(hs_response.text)
+                # Filter haskell solutions by the pattern
+                hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
+        
+        all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
+        return JsonResponse(all_solutions, safe=False)
 
 """
 {

@@ -239,3 +239,20 @@ def combine_solutions(hs_solutions, unlikely_solutions):
             unlikely_solutions.append(hs_sol)
 
     return unlikely_solutions
+
+def filter_by_pattern(solutions, pattern):
+    # Given a list of solutions, will filter them by whether they match a given pattern
+    filtered = []
+    for solution in solutions:
+        answer = solution["answer"]
+        if matches_pattern(answer, pattern):
+            filtered.append(solution)
+    return filtered
+
+def matches_pattern(answer, pattern):
+    # Assumes length of answer is the same as length of pattern
+    answer_upper = answer.upper()
+    for i in range(len(answer)):
+        if pattern[i] != '?' and answer_upper[i] != pattern[i]:
+            return False
+    return True
