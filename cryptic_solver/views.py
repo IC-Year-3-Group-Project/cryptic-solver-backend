@@ -111,7 +111,7 @@ def solve_and_explain(request):
 {
     (String) 'clue'
     (int)    'word_length'
-    (dict)   'pattern' e.g (index 3 -> 'e', index 5 -> 'a')  == ___E_A
+    (dict)   'pattern' e.g (index 3 -> 'e', index 5 -> 'a')  == ___E_A // WRONG
 }
 """
 
@@ -183,7 +183,7 @@ def fetch_crossword(request):
 """
 {
   "word_length": 7,
-  "pattern": {"0": "a", "1": "v"},
+  "pattern": {"0": "a", "1": "v"}, // WRONG
   "clue": " "
 }
 """
@@ -194,20 +194,42 @@ def solve_with_dict(request):
     if request.method == 'OPTIONS':
         return option_response()
     else:
+        # Get data from request
+        data = json.loads(request.body)
+        clue = data["clue"]
+        word_length = data["word_length"]
+        pattern = data["pattern"]
+        letter_pattern = data["letter_pattern"]
 
-        pattern = json.loads(request.body)['pattern']
-        word_length = json.loads(request.body)['word_length']
-        clue = json.loads(request.body)['clue']
+        unlikely_solutions = []
+        hs_solutions = []
 
-        cands = get_candidates(pattern, word_length)
+        # Gather solutions from Unlikely solver only based on pattern
+        unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
+        
+        if unlikely_response.status_code == 200:
+            data = json.loads(unlikely_response.text)
+            unlikely_solutions = parse_unlikely_with_explanations(data)
+            # Filter Unlikely solutions by the pattern
+            unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
 
+
+        # Gather solutions from Haskell solver
+        # Get candidates from dictionary based on pattern
+        cands = get_candidates(letter_pattern, word_length)
         print(cands)
 
-        response = hs_solve_with_cands(clue, word_length, cands)
+        hs_solutions = []
+        if len(cands) > 0:
+            hs_response = hs_solve_with_cands(clue, word_length, cands)
+            print("haskell response:", hs_response.text)
+            if hs_response.status_code == 200:
+                hs_solutions = format_haskell_answers(hs_response.text)
+        
+        all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
+        all_solutions = unlikely_solutions
 
-        solutions = make_list(response.text)
-
-        return JsonResponse(solutions, safe=False)
+        return JsonResponse(all_solutions, safe=False)
 
 
 @csrf_exempt

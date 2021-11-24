@@ -57,14 +57,19 @@ def make_list(text):
 def get_candidates(pattern, word_length):
 
 
-    search_string = ""
-    for i in range(word_length):
-        if str(i) in pattern:
-            search_string += str.lower(pattern[str(i)])
-        elif i in pattern:
-            search_string += str.lower(pattern[i])
-        else:
-            search_string += '_'   
+    search_string = pattern.replace("?", "_")
+    # # for i in range(word_length):
+    # #     # if str(i) in pattern:
+    # #     #     search_string += str.lower(pattern[str(i)])
+    # #     # # elif i in pattern:
+    # #     # #     search_string += str.lower(pattern[i])
+    # #     # else:
+    # #     #     search_string += '_'  
+    # #     if pattern[i] == '?':
+    # #         pattern[i] = "_" 
+
+    # print("search string:", search_string)
+    search_string = search_string.lower()
 
     global english_dict
     if english_dict == None:
