@@ -109,9 +109,10 @@ def solve_and_explain(request):
 
 """
 {
-    (String) 'clue'
-    (int)    'word_length'
-    (dict)   'pattern' e.g (index 3 -> 'e', index 5 -> 'a')  == ___E_A // WRONG
+  "word_length": 8,
+  "pattern": "O?LA??M?,
+  "clue": " "
+  "pattern": "(8)"
 }
 """
 
@@ -140,14 +141,13 @@ def solve_with_pattern(request):
             # Filter Unlikely solutions by the pattern
             unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
 
-        if not ("-" in pattern or "," in pattern):
-            # Gather solutions from Haskell solver
-            hs_response = hs_solve_and_explain_clue(clue, word_length)
-            
-            if hs_response.status_code == 200:
-                hs_solutions = format_haskell_answers(hs_response.text)
-                # Filter haskell solutions by the pattern
-                hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
+        # Gather solutions from Haskell solver
+        hs_response = hs_solve_and_explain_clue(clue, word_length)
+        
+        if hs_response.status_code == 200:
+            hs_solutions = format_haskell_answers(hs_response.text)
+            # Filter haskell solutions by the pattern
+            hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
         
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
@@ -182,9 +182,10 @@ def fetch_crossword(request):
 
 """
 {
-  "word_length": 7,
-  "pattern": {"0": "a", "1": "v"}, // WRONG
+  "word_length": 8,
+  "pattern": "O?LA??M?,
   "clue": " "
+  "pattern": "(8)"
 }
 """
 
@@ -217,12 +218,10 @@ def solve_with_dict(request):
         # Gather solutions from Haskell solver
         # Get candidates from dictionary based on pattern
         cands = get_candidates(letter_pattern, word_length)
-        print(cands)
 
-        hs_solutions = []
+        # Call haskell only if there is at least one candidate
         if len(cands) > 0:
             hs_response = hs_solve_with_cands(clue, word_length, cands)
-            print("haskell response:", hs_response.text)
             if hs_response.status_code == 200:
                 hs_solutions = format_haskell_answers(hs_response.text)
         
