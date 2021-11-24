@@ -250,6 +250,12 @@ def filter_by_pattern(solutions, pattern):
     filtered = []
     for solution in solutions:
         answer = solution["answer"]
+        # Since the unlikely solver returns two word answers with a dash or space between words,
+        # we get rid of that dash or space
+        answer = answer.replace("-", "")
+        answer = answer.replace(" ", "")
+
+        print(answer)
         if matches_pattern(answer, pattern):
             filtered.append(solution)
     return filtered

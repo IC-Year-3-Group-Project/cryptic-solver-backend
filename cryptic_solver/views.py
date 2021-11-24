@@ -219,8 +219,9 @@ def solve_with_dict(request):
         # Get candidates from dictionary based on pattern
         cands = get_candidates(letter_pattern, word_length)
 
-        # Call haskell only if there is at least one candidate
-        if len(cands) > 0:
+        # Call haskell only if there is at least one candidate and we are looking
+        # for a one word answer
+        if len(cands) > 0 and (not ("-" in pattern or "," in pattern)):
             hs_response = hs_solve_with_cands(clue, word_length, cands)
             if hs_response.status_code == 200:
                 hs_solutions = format_haskell_answers(hs_response.text)
