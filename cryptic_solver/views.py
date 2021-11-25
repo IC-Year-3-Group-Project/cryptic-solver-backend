@@ -10,9 +10,12 @@ from cryptic_solver.unlikely_interface import *
 import requests
 import re
 import html
+import asyncio
 from bs4 import BeautifulSoup
 
-from cryptic_solver.models import Puzzle
+import time
+
+#from cryptic_solver.models import Puzzle
 
 allowed_crossword_prefixes = [
     "https://www.theguardian.com/crosswords/everyman"]
@@ -75,8 +78,9 @@ def unlikely_solve_clue(request):
             return JsonResponse(solution, safe=False)
 
 
+
 @csrf_exempt
-def solve_and_explain(request):
+async def solve_and_explain(request):
     if request.method == "OPTIONS":
         return option_response()
     else:
@@ -86,24 +90,34 @@ def solve_and_explain(request):
         word_length = data["word_length"]
         pattern = data["pattern"]
 
+        loop = asyncio.get_event_loop()
+
         unlikely_solutions = []
         hs_solutions = []
 
         # Gather solutions from Unlikely solver
-        unlikely_response = uai_solve_clue(clue, pattern)
-        
-        if unlikely_response.status_code == 200:
-            data = json.loads(unlikely_response.text)
-            unlikely_solutions = parse_unlikely_with_explanations(data)
+        uai_call = asyncio.gather(uai_solve_clue(clue, pattern))
+
+        calls = asyncio.gather(uai_call)
 
         # Haskell solver only handles one word answers
         if not ("-" in pattern or "," in pattern):
             # Gather solutions from Haskell solver
-            hs_response = hs_solve_and_explain_clue(clue, word_length)
-            
-            if hs_response.status_code == 200:
-                hs_solutions = format_haskell_answers(hs_response.text)
-        
+            hs_call = asyncio.gather(hs_solve_and_explain_clue(clue, word_length))
+            calls = asyncio.gather(uai_call, hs_call)
+
+        # await responses from both solvers
+        responses = loop.run_until_complete(calls)
+
+        for response in responses:
+            r = response[0]
+            if response.status_code == 200:
+                data = json.loads(r.text)
+                if "screen-list" in data:
+                    unlikely_solutions = parse_unlikely_with_explanations(data)
+                else:
+                    hs_solutions = format_haskell_answers(r.text)
+
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
         return JsonResponse(all_solutions, safe=False)
@@ -118,6 +132,7 @@ def solve_and_explain(request):
 }
 """
 
+# Add concurrency here
 
 @csrf_exempt
 def solve_with_pattern(request):
@@ -131,26 +146,34 @@ def solve_with_pattern(request):
         pattern = data["pattern"]
         letter_pattern = data["letter_pattern"]
 
+        loop = asyncio.get_event_loop()
+
         unlikely_solutions = []
         hs_solutions = []
 
         # Gather solutions from Unlikely solver
-        unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
-        
-        if unlikely_response.status_code == 200:
-            data = json.loads(unlikely_response.text)
-            unlikely_solutions = parse_unlikely_with_explanations(data)
-            # Filter Unlikely solutions by the pattern
-            unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
+        uai_call = asyncio.gather(uai_solve_with_pattern(clue, pattern, letter_pattern))
+        calls = asyncio.gather(uai_call)
 
-        # Gather solutions from Haskell solver
-        hs_response = hs_solve_and_explain_clue(clue, word_length)
-        
-        if hs_response.status_code == 200:
-            hs_solutions = format_haskell_answers(hs_response.text)
-            # Filter haskell solutions by the pattern
-            hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
-        
+        if not ("-" in pattern or "," in pattern):
+            # Gather solutions from Haskell solver
+            hs_call = asyncio.gather(hs_solve_and_explain_clue(clue, word_length))
+            calls = asyncio.gather(uai_call, hs_call)
+
+        # responses is a list of singleton lists containing responses
+        responses = loop.run_until_complete(calls)
+
+        for response in responses:
+            r = response[0]
+            if response.status_code == 200:
+                data = json.loads(r.text)
+                if "screen-list" in data:
+                    unlikely_solutions = parse_unlikely_with_explanations(data)
+                    unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
+                else:
+                    hs_solutions = format_haskell_answers(r.text)
+                    hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
+
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
         return JsonResponse(all_solutions, safe=False)
@@ -191,6 +214,7 @@ def fetch_crossword(request):
 }
 """
 
+# Add concurrency here (look at solve_and_explain if you've forgotten)
 
 @csrf_exempt
 def solve_with_dict(request):
@@ -207,14 +231,11 @@ def solve_with_dict(request):
         unlikely_solutions = []
         hs_solutions = []
 
+        loop = asyncio.get_event_loop()
+
         # Gather solutions from Unlikely solver only based on pattern
-        unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
-        
-        if unlikely_response.status_code == 200:
-            data = json.loads(unlikely_response.text)
-            unlikely_solutions = parse_unlikely_with_explanations(data)
-            # Filter Unlikely solutions by the pattern
-            unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
+        uai_call = asyncio.gather(ai_solve_with_pattern(clue, pattern, letter_pattern))
+        calls = asyncio.gather(uai_call)
 
 
         # Gather solutions from Haskell solver
@@ -224,12 +245,23 @@ def solve_with_dict(request):
         # Call haskell only if there is at least one candidate and we are looking
         # for a one word answer
         if len(cands) > 0 and (not ("-" in pattern or "," in pattern)):
-            hs_response = hs_solve_with_cands(clue, word_length, cands)
-            if hs_response.status_code == 200:
-                hs_solutions = format_haskell_answers(hs_response.text)
-        
+            hs_call = asyncio.gather(hs_solve_with_cands(clue, word_length, cands))
+            calls = asyncio.gather(uai_call, hs_call)
+
+        # await responses from both solvers
+        responses = loop.run_until_complete(calls)
+
+        for response in responses:
+            r = response[0]
+            if response.status_code == 200:
+                data = json.loads(r.text)
+                if "screen-list" in data:
+                    unlikely_solutions = parse_unlikely_with_explanations(data)
+                    unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
+                else:
+                    hs_solutions = format_haskell_answers(r.text)
+
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
-        all_solutions = unlikely_solutions
 
         return JsonResponse(all_solutions, safe=False)
 
@@ -311,3 +343,81 @@ def get_puzzle(request):
         if (len(x) == 0):
             return JsonResponse({"grid": {}})
         return JsonResponse({"grid": x.get().grid_json})
+
+
+def no_async_test(clue, word_length, pattern):
+
+    unlikely_solutions = []
+    hs_solutions = []
+
+    # Gather solutions from Unlikely solver
+    unlikely_response = uai_solve_clue_no_async(clue, pattern)
+
+    # Haskell solver only handles one word answers
+    if not ("-" in pattern or "," in pattern):
+        # Gather solutions from Haskell solver
+        hs_response = hs_solve_and_explain_clue_no_async(clue, word_length)
+        if hs_response.status_code == 200:
+            hs_solutions = format_haskell_answers(hs_response.text)
+
+    if unlikely_response.status_code == 200:
+        data = json.loads(unlikely_response.text)
+        unlikely_solutions = parse_unlikely_with_explanations(data)
+
+    all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
+
+    return all_solutions
+
+def async_test(clue, word_length, pattern):
+    loop = asyncio.get_event_loop()
+
+    unlikely_solutions = []
+    hs_solutions = []
+
+    # Gather solutions from Unlikely solver
+    uai_call = asyncio.gather(uai_solve_clue(clue, pattern))
+
+    #unlikely_response = loop.run_until_complete(uai_call)
+    #print(unlikely_response)
+
+    calls = asyncio.gather(uai_call)
+
+    if not ("-" in pattern or "," in pattern):
+        # Gather solutions from Haskell solver
+        hs_call = asyncio.gather(hs_solve_and_explain_clue(clue, word_length))
+        calls = asyncio.gather(uai_call, hs_call)
+        #hs_response = loop.run_until_complete(hs_call)
+        #print(hs_response)
+
+    responses = loop.run_until_complete(calls)
+    print(responses)
+
+    for i, response in enumerate(responses):
+        r = response[0]
+        data = json.loads(r.text)
+        if "screen-list" in data:
+            print(f"unlikely response was number {i+1}")
+            unlikely_solutions = parse_unlikely_with_explanations(data)
+        else:
+            print(f"haskell response was number {i+1}")
+            hs_solutions = format_haskell_answers(r.text)
+
+    solutions = combine_solutions(unlikely_solutions, hs_solutions)
+    return solutions
+
+def compare_async():
+    clue = "peeling paint, profit slack, upset, in a state"
+    word_length = 10
+    pattern = "(10)"
+
+
+    start = time.time()
+    no_async = no_async_test(clue, word_length, pattern)
+    n_async_time = time.time() - start
+    print(f"no async took {n_async_time}")
+
+    start = time.time()
+    with_async = async_test(clue, word_length, pattern)
+    async_time = time.time() - start
+    print(f"async took {async_time}")
+
