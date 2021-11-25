@@ -259,6 +259,6 @@ def matches_pattern(answer, pattern):
     # Assumes length of answer is the same as length of pattern
     answer_upper = answer.upper()
     for i in range(len(answer)):
-        if pattern[i] != '?' and answer_upper[i] != pattern[i]:
+        if pattern[i] != '?' and pattern[i] == '_' and answer_upper[i] != pattern[i]:
             return False
     return True
