@@ -55,10 +55,3 @@ def call_unlikely_no_async(clue, solution_pattern, letter_pattern=""):
     r = requests.get(url=fullURL)
 
     return r
-
-
-
-#loop = asyncio.get_event_loop()
-#call = asyncio.gather(uai_solve_clue("peeling paint, profit slack, upset, in a state", "(10)"))
-#r = loop.run_until_complete(call)[0]
-#print(r.text)

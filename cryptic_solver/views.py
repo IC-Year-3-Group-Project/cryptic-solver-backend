@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 
 import time
 
-#from cryptic_solver.models import Puzzle
+from cryptic_solver.models import Puzzle
 
 allowed_crossword_prefixes = [
     "https://www.theguardian.com/crosswords/everyman"]
@@ -132,7 +132,6 @@ async def solve_and_explain(request):
 }
 """
 
-# Add concurrency here
 
 @csrf_exempt
 def solve_with_pattern(request):
@@ -214,7 +213,6 @@ def fetch_crossword(request):
 }
 """
 
-# Add concurrency here (look at solve_and_explain if you've forgotten)
 
 @csrf_exempt
 def solve_with_dict(request):
