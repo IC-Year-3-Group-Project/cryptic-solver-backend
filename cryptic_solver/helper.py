@@ -236,7 +236,7 @@ def combine_solutions(hs_solutions, unlikely_solutions):
     for hs_sol in hs_solutions:
         is_duplicate = False
         for uai_sol in unlikely_solutions:
-            if hs_sol["answer"] == uai_sol["answer"]:
+            if hs_sol["answer"].lower() == uai_sol["answer"].lower():
                 is_duplicate = True
                 break
 

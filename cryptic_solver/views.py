@@ -56,6 +56,7 @@ def unlikely_solve_clue(request):
     if request.method == "OPTIONS":
         return option_response()
     else:
+        # Get data from request
         data = json.loads(request.body)
         clue = data["clue"]
         word_length = data["word_length"]
@@ -95,6 +96,7 @@ def solve_and_explain(request):
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
 
+        # Haskell solver only handles one word answers
         if not ("-" in pattern or "," in pattern):
             # Gather solutions from Haskell solver
             hs_response = hs_solve_and_explain_clue(clue, word_length)
