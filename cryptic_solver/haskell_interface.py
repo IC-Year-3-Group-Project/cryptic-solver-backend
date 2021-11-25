@@ -40,6 +40,8 @@ def hs_solve_and_explain_clue(clue, word_length, explain=True):
     return call_haskell("", clue, word_length, explain=explain)
 
 def hs_solve_with_answer(clue, word_length, answer, explain=True):
+    # Haskell solver likes lowercase
+    answer = answer.lower()
     return call_haskell("WithAnswer", clue, word_length, answers=answer, explain=explain)
 
 
