@@ -44,6 +44,8 @@ def hs_solve_and_explain_clue_no_async(clue, word_length, explain=True):
     return call_haskell_no_async("", clue, word_length, explain=explain)
 
 def hs_solve_with_answer(clue, word_length, answer, explain=True):
+    # Haskell solver likes lowercase
+    answer = answer.lower()
     return call_haskell_no_async("WithAnswer", clue, word_length, answers=answer, explain=explain)
 
 
