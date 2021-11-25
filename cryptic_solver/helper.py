@@ -21,20 +21,15 @@ def matching(pattern, responses):
     """
     Filters a list of possible solutions based on known letters.
     Parameters:
-    pattern: a dict with indexes mapped to a known letter at that index.
-             For example, {1:'a', 3:'c', 5:'e'} corresponds to the pattern _A_C_E
+    pattern: a string with known letters and underscores for unknown letters
+             For example, _A_C_E
     responses: a list of strings, all of which are potential solutions to the clue
     Returns:
     result: a list of the solutions from responses that match the given pattern
     """
     result = []
     for response in responses:
-        match = True
-        for k,v in pattern.items():
-            if (response[int(k)] != v):
-                match = False
-                break
-        if (match):
+        if (matches_pattern(response, pattern)):
             result.append(response)
     return result
 
@@ -57,14 +52,19 @@ def make_list(text):
 def get_candidates(pattern, word_length):
 
 
-    search_string = ""
-    for i in range(word_length):
-        if str(i) in pattern:
-            search_string += str.lower(pattern[str(i)])
-        elif i in pattern:
-            search_string += str.lower(pattern[i])
-        else:
-            search_string += '_'   
+    search_string = pattern.replace("?", "_")
+    # # for i in range(word_length):
+    # #     # if str(i) in pattern:
+    # #     #     search_string += str.lower(pattern[str(i)])
+    # #     # # elif i in pattern:
+    # #     # #     search_string += str.lower(pattern[i])
+    # #     # else:
+    # #     #     search_string += '_'  
+    # #     if pattern[i] == '?':
+    # #         pattern[i] = "_" 
+
+    # print("search string:", search_string)
+    search_string = search_string.lower()
 
     global english_dict
     if english_dict == None:
@@ -231,7 +231,7 @@ def combine_solutions(hs_solutions, unlikely_solutions):
     for hs_sol in hs_solutions:
         is_duplicate = False
         for uai_sol in unlikely_solutions:
-            if hs_sol["answer"] == uai_sol["answer"]:
+            if hs_sol["answer"].lower() == uai_sol["answer"].lower():
                 is_duplicate = True
                 break
 
@@ -239,3 +239,26 @@ def combine_solutions(hs_solutions, unlikely_solutions):
             unlikely_solutions.append(hs_sol)
 
     return unlikely_solutions
+
+def filter_by_pattern(solutions, pattern):
+    # Given a list of solutions, will filter them by whether they match a given pattern
+    filtered = []
+    for solution in solutions:
+        answer = solution["answer"]
+        # Since the unlikely solver returns two word answers with a dash or space between words,
+        # we get rid of that dash or space
+        answer = answer.replace("-", "")
+        answer = answer.replace(" ", "")
+
+        print(answer)
+        if matches_pattern(answer, pattern):
+            filtered.append(solution)
+    return filtered
+
+def matches_pattern(answer, pattern):
+    # Assumes length of answer is the same as length of pattern
+    answer_upper = answer.upper()
+    for i in range(len(answer)):
+        if pattern[i] != '?' and pattern[i] != '_' and answer_upper[i] != pattern[i]:
+            return False
+    return True

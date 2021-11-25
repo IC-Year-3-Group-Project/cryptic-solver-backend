@@ -46,17 +46,22 @@ def hs_solve_with_answer(clue, word_length, answer, explain=True):
 def hs_solve_with_pattern(clue, word_length, pattern):
     return call_haskell("All", clue, word_length)
 
-def hs_solve_with_cands(clue, word_length, candidates):
-    cand_string = reduce(lambda a, b: a + "%2C" + b, candidates)
+def hs_solve_with_cands(clue, word_length, candidates, explain=True):
+    # Candidates cannot be empty list
+    cand_string = ""
+    if (len(candidates) == 1):
+        cand_string = candidates[0]
+    else:
+        cand_string = reduce(lambda a, b: a + "," + b, candidates)
 
-    return call_haskell("WithAnswers", clue, word_length, cand_string=cand_string)
+    return call_haskell("WithAnswers", clue, word_length, explain=explain, answers=cand_string)
 
 
-def call_haskell(mode, clue, word_length, explain=False, answer="", cand_string=""):
+def call_haskell(mode, clue, word_length, explain=False, answers=""):
     extra = "AndExplain" if explain else ""
     clue = urllib.parse.quote(clue, safe='')
 
-    fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answer}/{cand_string}"
+    fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answers}"
 
     r = requests.get(url=fullURL)
 
