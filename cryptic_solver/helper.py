@@ -21,20 +21,15 @@ def matching(pattern, responses):
     """
     Filters a list of possible solutions based on known letters.
     Parameters:
-    pattern: a dict with indexes mapped to a known letter at that index.
-             For example, {1:'a', 3:'c', 5:'e'} corresponds to the pattern _A_C_E
+    pattern: a string with known letters and underscores for unknown letters
+             For example, _A_C_E
     responses: a list of strings, all of which are potential solutions to the clue
     Returns:
     result: a list of the solutions from responses that match the given pattern
     """
     result = []
     for response in responses:
-        match = True
-        for k,v in pattern.items():
-            if (response[int(k)] != v):
-                match = False
-                break
-        if (match):
+        if (matches_pattern(response, pattern)):
             result.append(response)
     return result
 
