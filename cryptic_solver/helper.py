@@ -257,8 +257,8 @@ def filter_by_pattern(solutions, pattern):
 
 def matches_pattern(answer, pattern):
     # Assumes length of answer is the same as length of pattern
-    answer_upper = answer.upper()
-    for i in range(len(answer)):
+    answer_upper = answer.upper().translate({ord(i): None for i in '\"\''})
+    for i in range(len(answer_upper)):
         if pattern[i] != '?' and pattern[i] != '_' and answer_upper[i] != pattern[i]:
             return False
     return True
