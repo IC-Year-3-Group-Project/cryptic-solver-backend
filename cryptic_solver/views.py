@@ -128,12 +128,11 @@ async def get_and_format_unlikely(clue, pattern, letter_pattern=""):
 
     return unlikely_solutions
 
-async def get_and_format_haskell(clue, word_length, letter_pattern="", use_dict=False):
+async def get_and_format_haskell(clue, word_length, letter_pattern="", cands=[]):
 
     hs_solutions = []
 
-    if use_dict:
-        cands = get_candidates(letter_pattern, word_length)
+    if len(cands) > 0:
         response = await hs_solve_with_cands(clue, word_length, cands)
     else:
         response = await hs_solve_and_explain_clue(clue, word_length)
@@ -282,8 +281,9 @@ def solve_with_dict(request):
         uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
         calls = asyncio.gather(uai_call)
 
+        cands = get_candidates(letter_pattern, word_length)
         if len(cands) > 0 and (not ("-" in pattern or "," in pattern)):
-            hs_call = asyncio.gather(get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, use_dict=True))
+            hs_call = asyncio.gather(get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, cands=cands))
             calls = asyncio.gather(uai_call, hs_call)
 
         # get the formatted responses from both solvers
