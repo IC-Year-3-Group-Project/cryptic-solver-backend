@@ -13,8 +13,6 @@ import html
 import asyncio
 from bs4 import BeautifulSoup
 
-import time
-
 from cryptic_solver.models import Puzzle
 
 allowed_crossword_prefixes = [
@@ -80,7 +78,7 @@ def unlikely_solve_clue(request):
 
 
 @csrf_exempt
-async def solve_and_explain(request):
+def solve_and_explain(request):
     if request.method == "OPTIONS":
         return option_response()
     else:
@@ -172,7 +170,7 @@ def solve_with_pattern_unlikely(request):
 
         unlikely_solutions = []
         unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
-        
+
         if unlikely_response.status_code == 200:
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
