@@ -148,6 +148,42 @@ async def get_and_format_haskell(clue, word_length, letter_pattern="", use_dict=
     return hs_solutions
 
 
+
+"""
+{
+  "word_length": 8,
+  "pattern": "O?LA??M?,
+  "clue": " "
+  "pattern": "(8)"
+}
+"""
+
+
+@csrf_exempt
+def solve_with_pattern_unlikely(request):
+    if request.method == "OPTIONS":
+        return option_response()
+    else:
+        # Get data from request
+        data = json.loads(request.body)
+        clue = data["clue"]
+        pattern = data["pattern"]
+        letter_pattern = data["letter_pattern"]
+
+        unlikely_solutions = []
+        unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
+        
+        if unlikely_response.status_code == 200:
+            data = json.loads(unlikely_response.text)
+            unlikely_solutions = parse_unlikely_with_explanations(data)
+
+            # Filter Unlikely solutions by the pattern
+            unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
+
+        return JsonResponse(unlikely_solutions, safe=False)
+
+
+
 """
 {
   "word_length": 8,
