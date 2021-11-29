@@ -91,7 +91,7 @@ def solve_and_explain(request):
 
         # Gather solutions from Unlikely solver
         unlikely_response = uai_solve_clue(clue, pattern)
-        
+
         if unlikely_response.status_code == 200:
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
@@ -100,10 +100,10 @@ def solve_and_explain(request):
         if not ("-" in pattern or "," in pattern):
             # Gather solutions from Haskell solver
             hs_response = hs_solve_and_explain_clue(clue, word_length)
-            
+
             if hs_response.status_code == 200:
                 hs_solutions = format_haskell_answers(hs_response.text)
-        
+
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
         return JsonResponse(all_solutions, safe=False)
@@ -133,7 +133,7 @@ def solve_with_pattern_unlikely(request):
 
         unlikely_solutions = []
         unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
-        
+
         if unlikely_response.status_code == 200:
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
@@ -172,21 +172,23 @@ def solve_with_pattern(request):
 
         # Gather solutions from Unlikely solver
         unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
-        
+
         if unlikely_response.status_code == 200:
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
             # Filter Unlikely solutions by the pattern
             unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
 
-        # Gather solutions from Haskell solver
-        hs_response = hs_solve_and_explain_clue(clue, word_length)
-        
-        if hs_response.status_code == 200:
-            hs_solutions = format_haskell_answers(hs_response.text)
-            # Filter haskell solutions by the pattern
-            hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
-        
+        # Haskell solver only handles one word answers
+        if not ("-" in pattern or "," in pattern):
+            # Gather solutions from Haskell solver
+            hs_response = hs_solve_and_explain_clue(clue, word_length)
+
+            if hs_response.status_code == 200:
+                hs_solutions = format_haskell_answers(hs_response.text)
+                # Filter haskell solutions by the pattern
+                hs_solutions = filter_by_pattern(hs_solutions, letter_pattern)
+
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
 
         return JsonResponse(all_solutions, safe=False)
@@ -245,7 +247,7 @@ def solve_with_dict(request):
 
         # Gather solutions from Unlikely solver only based on pattern
         unlikely_response = uai_solve_with_pattern(clue, pattern, letter_pattern)
-        
+
         if unlikely_response.status_code == 200:
             data = json.loads(unlikely_response.text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
@@ -263,7 +265,7 @@ def solve_with_dict(request):
             hs_response = hs_solve_with_cands(clue, word_length, cands)
             if hs_response.status_code == 200:
                 hs_solutions = format_haskell_answers(hs_response.text)
-        
+
         all_solutions = combine_solutions(hs_solutions, unlikely_solutions)
         all_solutions = unlikely_solutions
 
