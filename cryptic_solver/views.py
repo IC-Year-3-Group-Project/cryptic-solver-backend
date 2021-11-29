@@ -12,7 +12,7 @@ import re
 import html
 from bs4 import BeautifulSoup
 
-#from cryptic_solver.models import Puzzle
+from cryptic_solver.models import Puzzle
 
 allowed_crossword_prefixes = [
     "https://www.theguardian.com/crosswords/everyman"]
