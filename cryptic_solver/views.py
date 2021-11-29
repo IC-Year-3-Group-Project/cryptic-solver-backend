@@ -97,6 +97,7 @@ def solve_and_explain(request):
         uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern))
         calls = asyncio.gather(uai_call)
 
+
         # Haskell solver only handles one word answers
         if not ("-" in pattern or "," in pattern):
             # Gather solutions from Haskell solver
@@ -194,6 +195,7 @@ def solve_with_pattern(request):
         else:
             all_solutions = solutions[0][0]
 
+
         return JsonResponse(all_solutions, safe=False)
 
 """
@@ -252,6 +254,7 @@ def solve_with_dict(request):
         uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
         calls = asyncio.gather(uai_call)
 
+
         cands = get_candidates(letter_pattern, word_length)
         if len(cands) > 0 and (not ("-" in pattern or "," in pattern)):
             hs_call = asyncio.gather(get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, cands=cands))
@@ -265,6 +268,7 @@ def solve_with_dict(request):
             all_solutions = combine_solutions(solutions[0][0], solutions[1][0])
         else:
             all_solutions = solutions[0][0]
+
 
 
         return JsonResponse(all_solutions, safe=False)

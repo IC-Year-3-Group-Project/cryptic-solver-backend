@@ -1,14 +1,20 @@
 from cryptic_solver.helper import *
+from cryptic_solver import views
+from cryptic_solver import haskell_interface
 import unittest
+from mock import patch, MagicMock, Mock
+from unittest import mock
+
+
 
 class DictTests(unittest.TestCase):
     def test_one(self):
-        pattern = "A_E_A__" #{"0": 'A', "2":'E', "4":'A'} 
+        pattern = "A_E_A__" #{"0": 'A', "2":'E', "4":'A'}
 
         self.assertEqual(get_candidates(pattern, word_length=7), ['abeyant', 'acerata', 'acerate', 'acetals', 'acetary', 'acetars', 'acetate', 'adenase', 'agelast', 'agelaus', 'alegars', 'aleyard', 'alemana', 'ameland', 'amenage', 'amesace', 'anelace', 'apetaly', 'arecain', 'arefact', 'avenage', 'avenant', 'avenary', 'average', 'aweband', 'azelaic', 'azelate'])
 
     def test_two(self):
-        pattern = "A_E_A__" #{0: 'A', 2:'E', 4:'A'} 
+        pattern = "A_E_A__" #{0: 'A', 2:'E', 4:'A'}
 
         self.assertEqual(get_candidates(pattern, word_length=7), ['abeyant', 'acerata', 'acerate', 'acetals', 'acetary', 'acetars', 'acetate', 'adenase', 'agelast', 'agelaus', 'alegars', 'aleyard', 'alemana', 'ameland', 'amenage', 'amesace', 'anelace', 'apetaly', 'arecain', 'arefact', 'avenage', 'avenant', 'avenary', 'average', 'aweband', 'azelaic', 'azelate'])
 
@@ -58,6 +64,108 @@ class MakeListTests(unittest.TestCase):
         text = "['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY']"
 
         self.assertEqual(make_list(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
+
+
+
+class EndpointTests(unittest.TestCase):
+
+    def set_up(self):
+        self.one_word_request = Mock()
+        self.one_word_request.method = "TEST"
+        self.one_word_request.body = '{"clue" : "test clue", "word_length" : 10, "pattern" : "(10)", "letter_pattern" : "A_B_C_D_E_", "answer" : "banananana"}'
+
+        self.multi_word_request = Mock()
+        self.multi_word_request.method = "TEST"
+        self.multi_word_request.body = '{"clue" : "test clue", "word_length" : 10, "pattern" : "(4,6)", "letter_pattern" : "A_B_C_D_E_", "answer" : "bana nanana"}'
+
+        self.hs_response = Mock()
+        self.hs_response.text = "['banananana']"
+
+        self.hs_response_explain = Mock()
+        self.hs_response_explain.text = "['banananana: nanana -> BATMAN!']"
+
+
+        self.uai_response = Mock()
+        self.uai_response.text = '{"screen_list" : [{"candidate_list" : [{"candidate" : "banananana", "confidence" : 1.0, "explanation" : "nanana BATMAN!"}]}]}'
+
+        views.hs_solve_clue = MagicMock(return_value=self.hs_response)
+        views.hs_solve_and_explain_clue = MagicMock(return_value=self.hs_response_explain)
+        views.hs_solve_with_answer = MagicMock(return_value=self.hs_response_explain)
+        views.hs_solve_with_cands = MagicMock(return_value=self.hs_response_explain)
+
+        views.uai_solve_clue = MagicMock(return_value=self.uai_response)
+        views.uai_solve_with_pattern = MagicMock(return_value=self.uai_response)
+
+    #@mock.patch('views.hs_solve_clue', return_value="[this is a test]")
+    def test_solve_clue(self):
+        self.set_up()
+        solution = views.solve_clue(self.one_word_request)
+        views.hs_solve_clue.assert_called_once_with('test clue', 10)
+
+    def test_unlikely_solve_clue(self):
+        self.set_up()
+        solution = views.unlikely_solve_clue(self.one_word_request)
+        views.uai_solve_clue.assert_called_with('test clue', "(10)")
+        solution = views.unlikely_solve_clue(self.multi_word_request)
+        views.uai_solve_clue.assert_called_with('test clue', "(4,6)")
+
+    def test_solve_and_explain_one_word(self):
+        self.set_up()
+        solution = views.solve_and_explain(self.one_word_request)
+        views.uai_solve_clue.assert_called_with('test clue', "(10)")
+        views.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+
+    def test_solve_and_explain_multi_word(self):
+        self.set_up()
+        solution = views.solve_and_explain(self.multi_word_request)
+        views.uai_solve_clue.assert_called_with('test clue', "(4,6)")
+        views.hs_solve_and_explain_clue.assert_not_called()
+
+    def test_solve_with_pattern_one_word(self):
+        self.set_up()
+        solution = views.solve_with_pattern(self.one_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        views.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+
+    def test_solve_with_pattern_multi_word(self):
+        self.set_up()
+        solution = views.solve_with_pattern(self.multi_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+        views.hs_solve_and_explain_clue.assert_not_called()
+
+    def test_solve_with_pattern_unlikely(self):
+        self.set_up()
+        solution = views.solve_with_pattern(self.one_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        solution = views.solve_with_pattern(self.multi_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+
+    def test_solve_with_dict_one_word(self):
+        self.set_up()
+        views.get_candidates = MagicMock(return_value=["banananana"])
+        solution = views.solve_with_dict(self.one_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        views.hs_solve_with_cands.assert_called_with('test clue', 10, ["banananana"])
+
+    def test_solve_with_dict_one_word_no_cands(self):
+        self.set_up()
+        views.get_candidates = MagicMock(return_value=[])
+        solution = views.solve_with_dict(self.one_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        views.hs_solve_with_cands.assert_not_called()
+
+    def test_solve_with_dict_multi_word(self):
+        self.set_up()
+        views.get_candidates = MagicMock(return_value=["banananana"])
+        solution = views.solve_with_dict(self.multi_word_request)
+        views.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+        views.hs_solve_with_cands.assert_not_called()
+
+    def test_explain_answer(self):
+        self.set_up()
+        solution = views.explain_answer(self.one_word_request)
+        views.hs_solve_with_answer.assert_called_with('test clue', 10, "banananana", explain=True)
+
 
 if __name__ == '__main__':
     unittest.main()
