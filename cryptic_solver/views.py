@@ -71,8 +71,9 @@ def unlikely_solve_clue(request):
             return JsonResponse(solutions, safe=False)
         else:
             response = hs_solve_clue(clue, word_length)
-
-            solution = make_list(response.text)
+            solution = []
+            if response.status_code == 200:
+                solution = make_list(response.text)
 
             return JsonResponse(solution, safe=False)
 

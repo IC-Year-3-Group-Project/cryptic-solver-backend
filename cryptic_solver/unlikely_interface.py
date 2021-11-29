@@ -1,5 +1,7 @@
 import requests
 import urllib.parse
+
+from requests.models import Response
 from cryptic_solver_project import settings
 import asyncio
 
@@ -41,9 +43,13 @@ async def call_unlikely(clue, solution_pattern, letter_pattern=""):
     if letter_pattern != "":
         fullURL += f"&letterpattern={letter_pattern}"
 
-    r = requests.get(url=fullURL)
-
-    return r
+    try:
+        r = requests.get(url=fullURL, timeout=25)
+        return r
+    except:
+        r = Response()
+        r.status_code = 408 #Timeout response
+        return r
 
 def call_unlikely_no_async(clue, solution_pattern, letter_pattern=""):
     clue = urllib.parse.quote(clue, safe='')
@@ -52,6 +58,10 @@ def call_unlikely_no_async(clue, solution_pattern, letter_pattern=""):
     if letter_pattern != "":
         fullURL += f"&letterpattern={letter_pattern}"
 
-    r = requests.get(url=fullURL)
-
-    return r
+    try:
+        r = requests.get(url=fullURL, timeout=25)
+        return r
+    except:
+        r = Response()
+        r.status_code = 408 #Timeout response
+        return r

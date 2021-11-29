@@ -1,5 +1,7 @@
 import requests
 import urllib.parse
+
+from requests.models import Response
 from cryptic_solver_project import settings
 from functools import reduce
 import asyncio
@@ -69,9 +71,14 @@ async def call_haskell(mode, clue, word_length, explain=False, answers=""):
 
     fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answers}"
 
-    r = requests.get(url=fullURL)
+    try:
+        r = requests.get(url=fullURL, timeout=25)
+        return r
+    except:
+        r = Response()
+        r.status_code = 408 #Timeout response
+        return r
 
-    return r
 
 def call_haskell_no_async(mode, clue, word_length, explain=False, answers=""):
     extra = "AndExplain" if explain else ""
@@ -79,6 +86,10 @@ def call_haskell_no_async(mode, clue, word_length, explain=False, answers=""):
 
     fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answers}"
 
-    r = requests.get(url=fullURL)
-
-    return r
+    try:
+        r = requests.get(url=fullURL, timeout=25)
+        return r
+    except:
+        r = Response()
+        r.status_code = 408 #Timeout response
+        return r
