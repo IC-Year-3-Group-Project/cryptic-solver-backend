@@ -14,7 +14,7 @@ import html
 import asyncio
 from bs4 import BeautifulSoup
 
-from cryptic_solver.models import Puzzle
+#from cryptic_solver.models import Puzzle
 
 allowed_crossword_prefixes = [
     "https://www.theguardian.com/crosswords/everyman"]
@@ -351,4 +351,3 @@ def get_puzzle(request):
         if (len(x) == 0):
             return JsonResponse({"grid": {}})
         return JsonResponse({"grid": x.get().grid_json})
-
