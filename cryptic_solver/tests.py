@@ -6,7 +6,6 @@ from mock import patch, MagicMock, Mock
 from unittest import mock
 
 
-
 class DictTests(unittest.TestCase):
     def test_one(self):
         pattern = "A_E_A__" #{"0": 'A', "2":'E', "4":'A'}
@@ -64,6 +63,16 @@ class MakeListTests(unittest.TestCase):
         text = "['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY']"
 
         self.assertEqual(make_list(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
+
+
+class ConvertFromUnicodeTests(unittest.TestCase):
+    def test_with_non_ascii_characters(self):
+        text = 'ihs\\257n'
+        self.assertEqual(convert_from_unicode(text), 'ihsān')
+
+    def test_without_non_ascii_characters(self):
+        text = "no non-ascii characters here"
+        self.assertEqual(convert_from_unicode(text), text)
 
 
 
