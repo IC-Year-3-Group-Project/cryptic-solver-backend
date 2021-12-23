@@ -1,13 +1,14 @@
 from cryptic_solver.helper import *
 from cryptic_solver import views
 from cryptic_solver import async_calls
+from cryptic_solver import haskell_interface
 import unittest
 from mock import patch, MagicMock, Mock
-from asyncmock import AsyncMock
 from unittest import mock
+from syncer import sync
+import asyncio
 
 
-"""
 class DictTests(unittest.TestCase):
     def test_one(self):
         pattern = "A_E_A__" #{"0": 'A', "2":'E', "4":'A'}
@@ -66,43 +67,46 @@ class MakeListTests(unittest.TestCase):
 
         self.assertEqual(make_list(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
 
-"""
-
 
 class EndpointTests(unittest.TestCase):
 
     def set_up(self):
-        self.one_word_request = AsyncMock()
+        self.one_word_request = Mock()
         self.one_word_request.method = "TEST"
         self.one_word_request.body = '{"clue" : "test clue", "word_length" : 10, "pattern" : "(10)", "letter_pattern" : "A_B_C_D_E_", "answer" : "banananana"}'
 
-        self.multi_word_request = AsyncMock()
+        self.multi_word_request = Mock()
         self.multi_word_request.method = "TEST"
         self.multi_word_request.body = '{"clue" : "test clue", "word_length" : 10, "pattern" : "(4,6)", "letter_pattern" : "A_B_C_D_E_", "answer" : "bana nanana"}'
 
-        self.hs_response = AsyncMock()
+        self.hs_response = Mock()
         self.hs_response.text = "['banananana']"
 
-        self.hs_response_explain = AsyncMock()
+        self.hs_response_explain = Mock(name="hs_response_explain")
         self.hs_response_explain.text = "['banananana: nanana -> BATMAN!']"
 
+        self.hs_solutions = [{"answer" : "banananana", "confidence" : 1.0, "explanation" : "nanana -> BATMAN!"}]
 
-        self.uai_response = AsyncMock()
-        self.uai_response.text = '{"screen_list" : [{"candidate_list" : [{"candidate" : "banananana", "confidence" : 1.0, "explanation" : "nanana BATMAN!"}]}]}'
 
-        views.hs_solve_clue = MagicMock(return_value=self.hs_response)
-        views.hs_solve_and_explain_clue = AsyncMock(return_value=self.hs_response_explain)
+        self.uai_response = Mock()
+        self.uai_response.text = '{"screen-list" : [{"candidate-list" : [{"candidate" : "banananana", "confidence" : 1.0, "explanation" : "nanana BATMAN!"}]}]}'
+
+
+
+        views.hs_solve_and_explain_clue = mock.AsyncMock(return_value=self.hs_response_explain, name="views")
         views.hs_solve_with_answer = MagicMock(return_value=self.hs_response_explain)
-        views.hs_solve_with_cands = MagicMock(return_value=self.hs_response_explain)
+        views.hs_solve_clue = MagicMock(return_value=self.hs_response)
 
-        async_calls.hs_solve_and_explain_clue = AsyncMock(return_value=self.hs_response_explain)
+        async_calls.hs_solve_and_explain_clue = mock.AsyncMock(return_value=self.hs_response_explain, name="async_calls_hs")
+        async_calls.hs_solve_with_cands = mock.AsyncMock(return_value=self.hs_response_explain, name="async_calls_hs_cands")
 
-        async_calls.uai_solve_clue = AsyncMock(return_value=self.uai_response, side_effect=print("uai solve clue mocked in async_calls"))
+        async_calls.uai_solve_clue = mock.AsyncMock(return_value=self.uai_response, name="async_calls_uai")
+        async_calls.uai_solve_with_pattern = mock.AsyncMock(return_value=self.uai_response, name="async_calls_uai_pattern")
 
-        views.uai_solve_clue = AsyncMock(return_value=self.uai_response)
-        views.uai_solve_with_pattern = MagicMock(return_value=self.uai_response)
+        views.uai_solve_clue_no_async = MagicMock(return_value=self.uai_response)
 
-    """
+        haskell_interface.hs_solve_and_explain_clue = mock.AsyncMock(return_value=self.hs_response_explain, name="hs_interface")
+
 
     def test_solve_clue(self):
         self.set_up()
@@ -111,71 +115,93 @@ class EndpointTests(unittest.TestCase):
 
     def test_unlikely_solve_clue(self):
         self.set_up()
-        solution = views.unlikely_solve_clue(self.one_word_request)
-        views.uai_solve_clue.assert_called_with('test clue', "(10)")
-        solution = views.unlikely_solve_clue(self.multi_word_request)
-        views.uai_solve_clue.assert_called_with('test clue', "(4,6)")
+        views.unlikely_solve_clue(self.one_word_request)
+        views.uai_solve_clue_no_async.assert_called_with('test clue', "(10)")
+        views.unlikely_solve_clue(self.multi_word_request)
+        views.uai_solve_clue_no_async.assert_called_with('test clue', "(4,6)")
+
+
+    @sync
+    async def test_get_and_format_haskell(self):
+        self.set_up()
+        await async_calls.get_and_format_haskell('test clue', 10)
+        async_calls.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+
+    @sync
+    async def test_get_and_format_unlikely(self):
+        self.set_up()
+        await async_calls.get_and_format_unlikely('test clue', '(10)')
+        async_calls.uai_solve_clue.assert_called_with('test clue', '(10)')
+
+    @sync
+    async def test_no_get_and_format(self):
+        self.set_up()
+        await haskell_interface.hs_solve_and_explain_clue('test clue', 10)
+        haskell_interface.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+
+
 
 
     def test_solve_and_explain_one_word(self):
         self.set_up()
-        solution = views.solve_and_explain(self.one_word_request)
-        async_calls.uai_solve_clue.assert_called_with('test clue', "(10)")
-        #views.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+        views.solve_and_explain(self.one_word_request)
+        async_calls.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+        async_calls.uai_solve_clue.assert_called_with('test clue', '(10)')
 
 
     def test_solve_and_explain_multi_word(self):
         self.set_up()
-        solution = views.solve_and_explain(self.multi_word_request)
-        views.uai_solve_clue.assert_called_with('test clue', "(4,6)")
-        views.hs_solve_and_explain_clue.assert_not_called()
+        views.solve_and_explain(self.multi_word_request)
+        async_calls.uai_solve_clue.assert_called_with('test clue', "(4,6)")
+        async_calls.hs_solve_and_explain_clue.assert_not_called()
+
 
     def test_solve_with_pattern_one_word(self):
         self.set_up()
-        solution = views.solve_with_pattern(self.one_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
-        views.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
+        views.solve_with_pattern(self.one_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        async_calls.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
 
     def test_solve_with_pattern_multi_word(self):
         self.set_up()
-        solution = views.solve_with_pattern(self.multi_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
-        views.hs_solve_and_explain_clue.assert_not_called()
+        views.solve_with_pattern(self.multi_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+        async_calls.hs_solve_and_explain_clue.assert_not_called()
+
 
     def test_solve_with_pattern_unlikely(self):
         self.set_up()
-        solution = views.solve_with_pattern(self.one_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
-        solution = views.solve_with_pattern(self.multi_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+        views.solve_with_pattern(self.one_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        views.solve_with_pattern(self.multi_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+
 
     def test_solve_with_dict_one_word(self):
         self.set_up()
         views.get_candidates = MagicMock(return_value=["banananana"])
-        solution = views.solve_with_dict(self.one_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
-        views.hs_solve_with_cands.assert_called_with('test clue', 10, ["banananana"])
+        views.solve_with_dict(self.one_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        async_calls.hs_solve_with_cands.assert_called_with('test clue', 10, ["banananana"])
 
     def test_solve_with_dict_one_word_no_cands(self):
         self.set_up()
         views.get_candidates = MagicMock(return_value=[])
-        solution = views.solve_with_dict(self.one_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
-        views.hs_solve_with_cands.assert_not_called()
+        views.solve_with_dict(self.one_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(10)", "A_B_C_D_E_")
+        async_calls.hs_solve_with_cands.assert_not_called()
 
     def test_solve_with_dict_multi_word(self):
         self.set_up()
         views.get_candidates = MagicMock(return_value=["banananana"])
-        solution = views.solve_with_dict(self.multi_word_request)
-        views.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
-        views.hs_solve_with_cands.assert_not_called()
+        views.solve_with_dict(self.multi_word_request)
+        async_calls.uai_solve_with_pattern.assert_called_with('test clue', "(4,6)", "A_B_C_D_E_")
+        async_calls.hs_solve_with_cands.assert_not_called()
 
     def test_explain_answer(self):
         self.set_up()
-        solution = views.explain_answer(self.one_word_request)
+        views.explain_answer(self.one_word_request)
         views.hs_solve_with_answer.assert_called_with('test clue', 10, "banananana", explain=True)
-
-    """
 
 
 if __name__ == '__main__':

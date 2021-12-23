@@ -63,7 +63,7 @@ def unlikely_solve_clue(request):
         clue = data["clue"]
         word_length = data["word_length"]
         pattern = data["pattern"]
-        response = uai_solve_clue(clue, pattern)
+        response = uai_solve_clue_no_async(clue, pattern)
 
         if response.status_code == 200:
             data = json.loads(response.text)
@@ -90,9 +90,6 @@ def solve_and_explain(request):
         word_length = data["word_length"]
         pattern = data["pattern"]
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
         # Gather solutions from Unlikely solver
         uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern))
         calls = asyncio.gather(uai_call)
@@ -105,7 +102,7 @@ def solve_and_explain(request):
             calls = asyncio.gather(uai_call, hs_call)
 
         # get the formatted responses from both solvers
-        solutions = loop.run_until_complete(calls)
+        solutions = asyncio.get_event_loop().run_until_complete(calls)
 
         # combine all solutions returned by both solvers
         if len(solutions) == 2:
@@ -114,8 +111,6 @@ def solve_and_explain(request):
             all_solutions = solutions[0][0]
 
         return JsonResponse(all_solutions, safe=False)
-
-
 
 """
 {
@@ -174,9 +169,6 @@ def solve_with_pattern(request):
         pattern = data["pattern"]
         letter_pattern = data["letter_pattern"]
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
         # Gather solutions from Unlikely solver
         uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
         calls = asyncio.gather(uai_call)
@@ -187,7 +179,7 @@ def solve_with_pattern(request):
             calls = asyncio.gather(uai_call, hs_call)
 
         # get the formatted responses from both solvers
-        solutions = loop.run_until_complete(calls)
+        solutions = asyncio.get_event_loop().run_until_complete(calls)
 
         # combine all solutions returned by both solvers
         if len(solutions) == 2:
@@ -247,9 +239,6 @@ def solve_with_dict(request):
         pattern = data["pattern"]
         letter_pattern = data["letter_pattern"]
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
         # Gather solutions from Unlikely solver only based on pattern
         uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
         calls = asyncio.gather(uai_call)
@@ -261,7 +250,7 @@ def solve_with_dict(request):
             calls = asyncio.gather(uai_call, hs_call)
 
         # get the formatted responses from both solvers
-        solutions = loop.run_until_complete(calls)
+        solutions = asyncio.get_event_loop().run_until_complete(calls)
 
         # combine all solutions returned by both solvers
         if len(solutions) == 2:

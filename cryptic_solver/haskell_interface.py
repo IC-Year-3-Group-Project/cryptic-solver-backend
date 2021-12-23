@@ -93,3 +93,4 @@ def call_haskell_no_async(mode, clue, word_length, explain=False, answers=""):
         r = Response()
         r.status_code = 408 #Timeout response
         return r
+    return r

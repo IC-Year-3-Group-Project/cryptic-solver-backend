@@ -26,7 +26,6 @@ Returns:
 """
 
 async def uai_solve_clue(clue, solution_pattern):
-    print("why is this printing gaaaaaaaaarrghhhh")
     return await call_unlikely(clue, solution_pattern)
 
 def uai_solve_clue_no_async(clue, solution_pattern):
