@@ -46,6 +46,7 @@ def make_list(text):
 
     A Python list of those same solutions
     """
+    text = convert_from_unicode(text)
     text = text.translate({ord(i): None for i in '[]\"\' '})
     return text.split(',')
 
@@ -59,16 +60,16 @@ def get_candidates(pattern, word_length):
     # #     # # elif i in pattern:
     # #     # #     search_string += str.lower(pattern[i])
     # #     # else:
-    # #     #     search_string += '_'  
+    # #     #     search_string += '_'
     # #     if pattern[i] == '?':
-    # #         pattern[i] = "_" 
+    # #         pattern[i] = "_"
 
     # print("search string:", search_string)
     search_string = search_string.lower()
 
     global english_dict
     if english_dict == None:
-        english_dict = load_words()     
+        english_dict = load_words()
     result = english_dict.search(search_string)
     return result
 
@@ -84,6 +85,7 @@ def get_explanation(response_text):
 
     A Python singleton list of the explanation given for the solution
     """
+    response_text = convert_from_unicode(response_text)
     response_text = response_text.translate({ord(i): None for i in '\"\''})
     if response_text == "[]":
         return ""
@@ -186,6 +188,8 @@ def format_haskell_answers(response):
     if response == "[]":
         return []
 
+    response = convert_from_unicode(response)
+
     # Trim opening and closing square bracket
     response = response[1 : len(response) - 1]
     # Split response into a list of responses - answers with explanations
@@ -262,3 +266,32 @@ def matches_pattern(answer, pattern):
         if pattern[i] != '?' and pattern[i] != '_' and answer_upper[i] != pattern[i]:
             return False
     return True
+
+def convert_from_unicode(text):
+    """
+
+    Converts decimal encodings of non-ASCII characters in the response text from the Haskell solver into the
+    corresponding characters.
+
+    Parameters:
+
+    text: the text of the response from the Haskell solver.
+
+    Returns:
+
+    text: the same text modified with the properly encoded characters
+
+    """
+    encodings = []
+    for i, char in enumerate(text):
+        if char == '\\':
+            code = ""
+            j = i + 1
+            while j < len(text) and text[j].isdigit():
+                code += text[j]
+                j += 1
+            encodings.append(int(code))
+
+    for code in encodings:
+        text = text.replace("\\" + str(code), chr(code))
+    return text
