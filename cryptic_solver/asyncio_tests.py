@@ -38,17 +38,12 @@ def async_test(clue, word_length, pattern):
     # Gather solutions from Unlikely solver
     uai_call = asyncio.gather(uai_solve_clue(clue, pattern))
 
-    #unlikely_response = loop.run_until_complete(uai_call)
-    #print(unlikely_response)
-
     calls = asyncio.gather(uai_call)
 
     if not ("-" in pattern or "," in pattern):
         # Gather solutions from Haskell solver
         hs_call = asyncio.gather(hs_solve_and_explain_clue(clue, word_length))
         calls = asyncio.gather(uai_call, hs_call)
-        #hs_response = loop.run_until_complete(hs_call)
-        #print(hs_response)
 
     responses = loop.run_until_complete(calls)
 
