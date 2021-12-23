@@ -8,7 +8,6 @@ from unittest import mock
 from syncer import sync
 import asyncio
 
-
 class DictTests(unittest.TestCase):
     def test_one(self):
         pattern = "A_E_A__" #{"0": 'A', "2":'E', "4":'A'}
@@ -67,6 +66,14 @@ class MakeListTests(unittest.TestCase):
 
         self.assertEqual(make_list(text), ['AVERAGE', 'ACADEMY', 'ADDRESS', 'ACCUSED', 'ABILITY'])
 
+class ConvertFromUnicodeTests(unittest.TestCase):
+    def test_with_non_ascii_characters(self):
+        text = 'ihs\\257n'
+        self.assertEqual(convert_from_unicode(text), 'ihsān')
+
+    def test_without_non_ascii_characters(self):
+        text = "no non-ascii characters here"
+        self.assertEqual(convert_from_unicode(text), text)
 
 class EndpointTests(unittest.TestCase):
 
@@ -138,8 +145,6 @@ class EndpointTests(unittest.TestCase):
         self.set_up()
         await haskell_interface.hs_solve_and_explain_clue('test clue', 10)
         haskell_interface.hs_solve_and_explain_clue.assert_called_with('test clue', 10)
-
-
 
 
     def test_solve_and_explain_one_word(self):
