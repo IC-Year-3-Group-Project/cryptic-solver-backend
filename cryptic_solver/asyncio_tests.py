@@ -100,9 +100,10 @@ def with_async_stats():
             max_time = async_time
         elif async_time < min_time:
             min_time = async_time
-        average *= (i - 1)
-        average += async_time
-        average = float(average) / float(i)
+        total += async_time
+        print(f"done {i} times")
+
+    average = float(total) / float(10)
     print(f"minimum time for old async: {min_time}")
     print(f"maximum time for old async: {max_time}")
     print(f"average time for old async: {average}")
@@ -126,9 +127,10 @@ def new_async_stats():
             max_time = async_time
         elif async_time < min_time:
             min_time = async_time
-        average *= (i - 1)
-        average += async_time
-        average = float(average) / float(i)
+        total += async_time
+        print(f"done {i} times")
+
+    average = float(total) / float(10)
     print(f"minimum time for new async: {min_time}")
     print(f"maximum time for new async: {max_time}")
     print(f"average time for new async: {average}")
@@ -141,7 +143,7 @@ def no_async_stats():
 
     max_time = -1
     min_time = 10000
-    average = 0
+    total = 0
 
     for i in range(1,11):
         start = time.time()
@@ -151,9 +153,11 @@ def no_async_stats():
             max_time = async_time
         elif async_time < min_time:
             min_time = async_time
-        average *= (i - 1)
-        average += async_time
-        average = float(average) / float(i)
+        total += async_time
+        print(f"done {i} times")
+
+    average = float(total) / float(10)
     print(f"minimum time for no async: {min_time}")
     print(f"maximum time for no async: {max_time}")
     print(f"average time for no async: {average}")
+    return min_time, max_time, average

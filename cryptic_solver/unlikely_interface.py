@@ -65,3 +65,6 @@ def call_unlikely_no_async(clue, solution_pattern, letter_pattern=""):
         r = Response()
         r.status_code = 408 #Timeout response
         return r
+
+r = asyncio.run(uai_solve_with_pattern("Shook with cold three times as much around start of March", "(8)", "BOUNDARY"))
+print(r.text)
