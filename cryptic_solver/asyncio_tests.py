@@ -46,14 +46,16 @@ def async_test(clue, word_length, pattern):
         calls = asyncio.gather(uai_call, hs_call)
 
     responses = loop.run_until_complete(calls)
+    print(responses)
 
     for i, response in enumerate(responses):
         r = response[0]
-        data = json.loads(r.text)
-        if "screen-list" in data:
-            unlikely_solutions = parse_unlikely_with_explanations(data)
-        else:
-            hs_solutions = format_haskell_answers(r.text)
+        if r.status_code == 200:
+            data = json.loads(r.text)
+            if "screen-list" in data:
+                unlikely_solutions = parse_unlikely_with_explanations(data)
+            else:
+                hs_solutions = format_haskell_answers(r.text)
 
     solutions = combine_solutions(unlikely_solutions, hs_solutions)
     return solutions
@@ -90,7 +92,7 @@ def with_async_stats():
 
     max_time = -1
     min_time = 10000
-    average = 0
+    total = 0
 
     for i in range(1,11):
         start = time.time()
@@ -117,7 +119,7 @@ def new_async_stats():
 
     max_time = -1
     min_time = 10000
-    average = 0
+    total = 0
 
     for i in range(1,11):
         start = time.time()
