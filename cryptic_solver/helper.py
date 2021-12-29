@@ -254,7 +254,6 @@ def filter_by_pattern(solutions, pattern):
         answer = answer.replace("-", "")
         answer = answer.replace(" ", "")
 
-        print(answer)
         if matches_pattern(answer, pattern):
             filtered.append(solution)
     return filtered

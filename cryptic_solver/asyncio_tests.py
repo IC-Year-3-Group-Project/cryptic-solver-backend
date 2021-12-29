@@ -4,6 +4,7 @@ import json
 from cryptic_solver.unlikely_interface import *
 from cryptic_solver.haskell_interface import *
 from cryptic_solver.helper import *
+from cryptic_solver.async_calls import *
 
 
 def no_async_test(clue, word_length, pattern):
@@ -46,16 +47,15 @@ def async_test(clue, word_length, pattern):
         calls = asyncio.gather(uai_call, hs_call)
 
     responses = loop.run_until_complete(calls)
-    print(responses)
 
     for i, response in enumerate(responses):
-        r = response[0]
-        if r.status_code == 200:
-            data = json.loads(r.text)
+        text, status = response[0]
+        if status == 200:
+            data = json.loads(text)
             if "screen-list" in data:
                 unlikely_solutions = parse_unlikely_with_explanations(data)
             else:
-                hs_solutions = format_haskell_answers(r.text)
+                hs_solutions = format_haskell_answers(text)
 
     solutions = combine_solutions(unlikely_solutions, hs_solutions)
     return solutions
@@ -85,7 +85,7 @@ def new_async_test(clue, word_length, pattern):
 
 
 
-def with_async_stats():
+def with_async_stats(n):
     clue = "peeling paint, profit slack, upset, in a state"
     word_length = 10
     pattern = "(10)"
@@ -93,8 +93,9 @@ def with_async_stats():
     max_time = -1
     min_time = 10000
     total = 0
+    times = []
 
-    for i in range(1,11):
+    for i in range(n):
         start = time.time()
         with_async = async_test(clue, word_length, pattern)
         async_time = time.time() - start
@@ -103,16 +104,26 @@ def with_async_stats():
         elif async_time < min_time:
             min_time = async_time
         total += async_time
-        print(f"done {i} times")
+        times.append(async_time)
 
-    average = float(total) / float(10)
+    print(f"old async done {n} times")
+    times.sort()
+
+    average = float(total) / float(n)
+    if n % 2 == 0:
+        median = (times[int(n/2) - 1] + times[int(n/2)]) / 2
+    else:
+        median = times[(n - 1)/2]
+
     print(f"minimum time for old async: {min_time}")
     print(f"maximum time for old async: {max_time}")
-    print(f"average time for old async: {average}")
+    print(f"mean time for old async: {average}")
+    print(f"median time for old async: {median}")
+    return min_time, max_time, average, median
 
 
 
-def new_async_stats():
+def new_async_stats(n):
     clue = "peeling paint, profit slack, upset, in a state"
     word_length = 10
     pattern = "(10)"
@@ -120,8 +131,9 @@ def new_async_stats():
     max_time = -1
     min_time = 10000
     total = 0
+    times = []
 
-    for i in range(1,11):
+    for i in range(n):
         start = time.time()
         new_async = new_async_test(clue, word_length, pattern)
         async_time = time.time() - start
@@ -130,15 +142,24 @@ def new_async_stats():
         elif async_time < min_time:
             min_time = async_time
         total += async_time
-        print(f"done {i} times")
+        times.append(async_time)
 
-    average = float(total) / float(10)
+    print(f"new async done {n} times")
+    times.sort()
+
+    average = float(total) / float(n)
+    if n % 2 == 0:
+        median = (times[int(n/2) - 1] + times[int(n/2)]) / 2
+    else:
+        median = times[(n - 1)/2]
     print(f"minimum time for new async: {min_time}")
     print(f"maximum time for new async: {max_time}")
-    print(f"average time for new async: {average}")
+    print(f"mean time for new async: {average}")
+    print(f"median time for new async: {median}")
+    return min_time, max_time, average, median
 
 
-def no_async_stats():
+def no_async_stats(n):
     clue = "peeling paint, profit slack, upset, in a state"
     word_length = 10
     pattern = "(10)"
@@ -146,8 +167,9 @@ def no_async_stats():
     max_time = -1
     min_time = 10000
     total = 0
+    times = []
 
-    for i in range(1,11):
+    for i in range(n):
         start = time.time()
         n_async = no_async_test(clue, word_length, pattern)
         async_time = time.time() - start
@@ -156,10 +178,20 @@ def no_async_stats():
         elif async_time < min_time:
             min_time = async_time
         total += async_time
-        print(f"done {i} times")
+        times.append(async_time)
 
-    average = float(total) / float(10)
+    print(f"no async done {n} times")
+    times.sort()
+
+
+    average = float(total) / float(n)
+    if n % 2 == 0:
+        n = int(n/2)
+        median = (times[n - 1] + times[n]) / 2
+    else:
+        median = times[int((n - 1)/2)]
     print(f"minimum time for no async: {min_time}")
     print(f"maximum time for no async: {max_time}")
-    print(f"average time for no async: {average}")
-    return min_time, max_time, average
+    print(f"mean time for no async: {average}")
+    print(f"median time for no async: {median}")
+    return min_time, max_time, average, median

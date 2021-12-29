@@ -4,6 +4,7 @@ import urllib.parse
 from requests.models import Response
 from cryptic_solver_project import settings
 import asyncio
+import aiohttp
 
 unlikelyURL = settings.unlikelyURL
 
@@ -44,12 +45,14 @@ async def call_unlikely(clue, solution_pattern, letter_pattern=""):
         fullURL += f"&letterpattern={letter_pattern}"
 
     try:
-        r = requests.get(url=fullURL, timeout=25)
-        return r
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=fullURL, timeout=25) as r:
+                text = await r.text()
+                return text, r.status
     except:
         r = Response()
         r.status_code = 408 #Timeout response
-        return r
+        return "", r.status_code
 
 def call_unlikely_no_async(clue, solution_pattern, letter_pattern=""):
     clue = urllib.parse.quote(clue, safe='')
