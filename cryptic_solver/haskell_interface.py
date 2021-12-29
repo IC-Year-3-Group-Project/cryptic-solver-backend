@@ -5,6 +5,7 @@ from requests.models import Response
 from cryptic_solver_project import settings
 from functools import reduce
 import asyncio
+import aiohttp
 
 haskellURL = settings.haskellURL
 
@@ -72,12 +73,14 @@ async def call_haskell(mode, clue, word_length, explain=False, answers=""):
     fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answers}"
 
     try:
-        r = requests.get(url=fullURL, timeout=25)
-        return r
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url=fullURL, timeout=25) as r:
+                text = await r.text()
+                return text, r.status
     except:
         r = Response()
         r.status_code = 408 #Timeout response
-        return r
+        return "", r.status_code
 
 
 def call_haskell_no_async(mode, clue, word_length, explain=False, answers=""):

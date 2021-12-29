@@ -100,20 +100,19 @@ class EndpointTests(unittest.TestCase):
 
 
 
-        views.hs_solve_and_explain_clue = mock.AsyncMock(return_value=self.hs_response_explain, name="views")
+        views.hs_solve_and_explain_clue = mock.AsyncMock(return_value=[self.hs_response_explain.text, 200], name="views")
         views.hs_solve_with_answer = MagicMock(return_value=self.hs_response_explain)
         views.hs_solve_clue = MagicMock(return_value=self.hs_response)
 
-        async_calls.hs_solve_and_explain_clue = mock.AsyncMock(return_value=self.hs_response_explain, name="async_calls_hs")
-        async_calls.hs_solve_with_cands = mock.AsyncMock(return_value=self.hs_response_explain, name="async_calls_hs_cands")
+        async_calls.hs_solve_and_explain_clue = mock.AsyncMock(return_value=[self.hs_response_explain.text, 200], name="async_calls_hs")
+        async_calls.hs_solve_with_cands = mock.AsyncMock(return_value=[self.hs_response_explain.text, 200], name="async_calls_hs_cands")
 
-        async_calls.uai_solve_clue = mock.AsyncMock(return_value=self.uai_response, name="async_calls_uai")
-        async_calls.uai_solve_with_pattern = mock.AsyncMock(return_value=self.uai_response, name="async_calls_uai_pattern")
+        async_calls.uai_solve_clue = mock.AsyncMock(return_value=[self.uai_response.text, 200], name="async_calls_uai")
+        async_calls.uai_solve_with_pattern = mock.AsyncMock(return_value=[self.uai_response.text, 200], name="async_calls_uai_pattern")
 
         views.uai_solve_clue_no_async = MagicMock(return_value=self.uai_response)
 
-        haskell_interface.hs_solve_and_explain_clue = mock.AsyncMock(return_value=self.hs_response_explain, name="hs_interface")
-
+        haskell_interface.hs_solve_and_explain_clue = mock.AsyncMock(return_value=[self.hs_response_explain.text, 200], name="hs_interface")
 
     def test_solve_clue(self):
         self.set_up()
@@ -207,6 +206,17 @@ class EndpointTests(unittest.TestCase):
         self.set_up()
         views.explain_answer(self.one_word_request)
         views.hs_solve_with_answer.assert_called_with('test clue', 10, "banananana", explain=True)
+
+
+    def test_what_is_happening(self):
+        self.one_word_request = Mock()
+        self.one_word_request.method = "TEST"
+        self.one_word_request.body = '{"clue" : "Peeling paint, profit slack, upset, in a state", "word_length" : 10, "pattern" : "(10)", "letter_pattern" : "C_L_F_R_I_", "answer" : "california"}'
+
+        r = views.solve_and_explain(self.one_word_request)
+
+
+
 
 
 if __name__ == '__main__':
