@@ -159,7 +159,7 @@ async def solve_with_pattern(request):
         if use_hs:
             all_solutions = await gather_and_combine(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern), get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern))
         else:
-            all_solutions = await asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
+            all_solutions = await get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern)
 
         return JsonResponse(all_solutions, safe=False)
 
@@ -218,7 +218,7 @@ async def solve_with_dict(request):
         if use_hs:
             all_solutions = await gather_and_combine(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern), get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, cands=cands))
         else:
-            all_solutions = await asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
+            all_solutions = await get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern)
 
 
         return JsonResponse(all_solutions, safe=False)
