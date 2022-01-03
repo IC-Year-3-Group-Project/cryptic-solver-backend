@@ -81,6 +81,7 @@ def unlikely_solve_clue(request):
 
 
 @csrf_exempt
+@async_to_sync
 async def solve_and_explain(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -111,6 +112,7 @@ async def solve_and_explain(request):
 
 
 @csrf_exempt
+@async_to_sync
 async def solve_with_pattern_unlikely(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -143,6 +145,7 @@ async def solve_with_pattern_unlikely(request):
 
 
 @csrf_exempt
+@async_to_sync
 async def solve_with_pattern(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -201,6 +204,7 @@ def fetch_crossword(request):
 
 
 @csrf_exempt
+@async_to_sync
 async def solve_with_dict(request):
     if request.method == 'OPTIONS':
         return option_response()
