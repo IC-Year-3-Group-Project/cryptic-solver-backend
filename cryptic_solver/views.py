@@ -91,8 +91,9 @@ async def solve_and_explain(request):
         if use_hs:
             all_solutions = await gather_and_combine(get_and_format_unlikely(clue, pattern), get_and_format_haskell(clue, word_length))
         else:
-            all_solutions = await asyncio.gather(get_and_format_unlikely(clue, pattern))
+            all_solutions = await get_and_format_unlikely(clue, pattern)
 
+        print(all_solutions)
         return JsonResponse(all_solutions, safe=False)
 
 """
