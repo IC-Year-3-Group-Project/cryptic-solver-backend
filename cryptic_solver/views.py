@@ -2,8 +2,6 @@ import json
 from django.http import JsonResponse
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
-from django.views.decorators.csrf import csrf_exempt
-from asgiref.sync import async_to_sync
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
 from cryptic_solver.image_processing.image_recognition import recognize_image
@@ -39,7 +37,6 @@ def option_response():
 """
 
 
-@csrf_exempt
 def solve_clue(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -54,7 +51,6 @@ def solve_clue(request):
         return JsonResponse(solution, safe=False)
 
 
-@csrf_exempt
 def unlikely_solve_clue(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -80,8 +76,6 @@ def unlikely_solve_clue(request):
 
 
 
-@csrf_exempt
-@async_to_sync
 async def solve_and_explain(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -111,8 +105,6 @@ async def solve_and_explain(request):
 """
 
 
-@csrf_exempt
-@async_to_sync
 async def solve_with_pattern_unlikely(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -144,8 +136,6 @@ async def solve_with_pattern_unlikely(request):
 """
 
 
-@csrf_exempt
-@async_to_sync
 async def solve_with_pattern(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -173,7 +163,6 @@ async def solve_with_pattern(request):
 """
 
 
-@csrf_exempt
 def fetch_crossword(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -203,8 +192,6 @@ def fetch_crossword(request):
 """
 
 
-@csrf_exempt
-@async_to_sync
 async def solve_with_dict(request):
     if request.method == 'OPTIONS':
         return option_response()
@@ -228,7 +215,6 @@ async def solve_with_dict(request):
         return JsonResponse(all_solutions, safe=False)
 
 
-@csrf_exempt
 def explain_answer(request):
     if request.method == 'OPTIONS':
         return option_response()
@@ -246,7 +232,6 @@ def explain_answer(request):
         return JsonResponse(explanation, safe=False)
 
 
-@csrf_exempt
 def fetch_everyman(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -269,7 +254,6 @@ def fetch_everyman(request):
         return JsonResponse({"urls": list(urls)})
 
 
-@csrf_exempt
 def process_puzzle(request):
     if request.method == "OPTIONS":
         return option_response()
@@ -292,7 +276,6 @@ def process_puzzle(request):
         return JsonResponse({"id": puzzle.id, "grid": grid})
 
 
-@csrf_exempt
 def get_puzzle(request):
     if request.method == "OPTIONS":
         return option_response()
