@@ -93,7 +93,6 @@ async def solve_and_explain(request):
         else:
             all_solutions = await get_and_format_unlikely(clue, pattern)
 
-        print(all_solutions)
         return JsonResponse(all_solutions, safe=False)
 
 """
