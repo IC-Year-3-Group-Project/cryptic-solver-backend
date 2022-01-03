@@ -50,9 +50,7 @@ async def call_unlikely(clue, solution_pattern, letter_pattern=""):
                 text = await r.text()
                 return text, r.status
     except:
-        r = Response()
-        r.status_code = 408 #Timeout response
-        return "", r.status_code
+        return "", 408
 
 def call_unlikely_no_async(clue, solution_pattern, letter_pattern=""):
     clue = urllib.parse.quote(clue, safe='')
