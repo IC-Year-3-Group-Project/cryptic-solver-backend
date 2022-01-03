@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.http.response import HttpResponse, HttpResponseBadRequest, HttpResponseServerError
 
 from django.views.decorators.csrf import csrf_exempt
+from asgiref.sync import async_to_sync
 from cryptic_solver.helper import *
 from cryptic_solver.haskell_interface import *
 from cryptic_solver.image_processing.image_recognition import recognize_image
@@ -91,39 +92,11 @@ async def solve_and_explain(request):
         pattern = data["pattern"]
         use_hs = not ("-" in pattern or "," in pattern)
 
-        """
-        #loop = asyncio.get_event_loop()
-
-        # Gather solutions from Unlikely solver
-        uai_call = get_and_format_unlikely(clue, pattern)
-        calls.append[uai_call]
-        """
-
-        """
-        # Haskell solver only handles one word answers
-        if not ("-" in pattern or "," in pattern):
-            # Gather solutions from Haskell solver
-            use_hs = True
-            hs_call = get_and_format_haskell(clue, word_length)
-            calls.append()
-        """
-
         # get the formatted responses from both solvers
-        #solutions = loop.run_until_complete(calls)
-
-        uai_solutions = await get_and_format_unlikely(clue, pattern)
-        all_solutions = uai_solutions
         if use_hs:
-            hs_solutions = await get_and_format_haskell(clue, word_length)
-            all_solutions = combine_solutions(uai_solutions, hs_solutions)
-
-        # combine all solutions returned by both solvers
-        """
-        if len(solutions) == 2:
-            all_solutions = combine_solutions(solutions[0][0], solutions[1][0])
+            all_solutions = await gather_and_combine(get_and_format_unlikely(clue, pattern), get_and_format_haskell(clue, word_length))
         else:
-            all_solutions = solutions[0][0]
-        """
+            all_solutions = await asyncio.gather(get_and_format_unlikely(clue, pattern))
 
         return JsonResponse(all_solutions, safe=False)
 
@@ -138,7 +111,7 @@ async def solve_and_explain(request):
 
 
 @csrf_exempt
-def solve_with_pattern_unlikely(request):
+async def solve_with_pattern_unlikely(request):
     if request.method == "OPTIONS":
         return option_response()
     else:
@@ -149,14 +122,11 @@ def solve_with_pattern_unlikely(request):
         letter_pattern = data["letter_pattern"]
 
         unlikely_solutions = []
-        unlikely_response = uai_solve_with_pattern_no_async(clue, pattern, letter_pattern)
+        text, status_code = await uai_solve_with_pattern(clue, pattern, letter_pattern)
 
-        if unlikely_response.status_code == 200:
-            data = json.loads(unlikely_response.text)
+        if status_code == 200:
+            data = json.loads(text)
             unlikely_solutions = parse_unlikely_with_explanations(data)
-
-            # Filter Unlikely solutions by the pattern
-            unlikely_solutions = filter_by_pattern(unlikely_solutions, letter_pattern)
 
         return JsonResponse(unlikely_solutions, safe=False)
 
@@ -185,38 +155,11 @@ async def solve_with_pattern(request):
         letter_pattern = data["letter_pattern"]
         use_hs = not ("-" in pattern or "," in pattern)
 
-
-        """
-        loop = asyncio.get_event_loop()
-
-        # Gather solutions from Unlikely solver
-        uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
-        calls = asyncio.gather(uai_call)
-
-        if not ("-" in pattern or "," in pattern):
-            # Gather solutions from Haskell solver
-            hs_call = asyncio.gather(get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern))
-            calls = asyncio.gather(uai_call, hs_call)
-
-        # get the formatted responses from both solvers
-        solutions = loop.run_until_complete(calls)
-
-        """
-
-        uai_solutions = await get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern)
-        all_solutions = uai_solutions
+         # get the formatted responses from both solvers
         if use_hs:
-            hs_solutions = await get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern)
-            all_solutions = combine_solutions(uai_solutions, hs_solutions)
-
-        """
-        # combine all solutions returned by both solvers
-        if len(solutions) == 2:
-            all_solutions = combine_solutions(solutions[0][0], solutions[1][0])
+            all_solutions = await gather_and_combine(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern), get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern))
         else:
-            all_solutions = solutions[0][0]
-        """
-
+            all_solutions = await asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
 
         return JsonResponse(all_solutions, safe=False)
 
@@ -271,38 +214,11 @@ async def solve_with_dict(request):
         cands = get_candidates(letter_pattern, word_length)
         use_hs = len(cands) > 0 and (not ("-" in pattern or "," in pattern))
 
-        #loop = asyncio.get_event_loop()
-
-        """
-        # Gather solutions from Unlikely solver only based on pattern
-        uai_call = asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
-        calls = asyncio.gather(uai_call)
-        """
-
-
-        """
-        if len(cands) > 0 and (not ("-" in pattern or "," in pattern)):
-            hs_call = asyncio.gather(get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, cands=cands))
-            calls = asyncio.gather(uai_call, hs_call)
-
-        # get the formatted responses from both solvers
-        solutions = loop.run_until_complete(calls)
-
-        """
-
-        uai_solutions = await get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern)
-        all_solutions = uai_solutions
+         # get the formatted responses from both solvers
         if use_hs:
-            hs_solutions = await get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, cands=cands)
-            all_solutions = combine_solutions(uai_solutions, hs_solutions)
-
-        """
-        # combine all solutions returned by both solvers
-        if len(solutions) == 2:
-            all_solutions = combine_solutions(solutions[0][0], solutions[1][0])
+            all_solutions = await gather_and_combine(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern), get_and_format_haskell(clue, word_length, letter_pattern=letter_pattern, cands=cands))
         else:
-            all_solutions = solutions[0][0]
-        """
+            all_solutions = await asyncio.gather(get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern))
 
 
         return JsonResponse(all_solutions, safe=False)
