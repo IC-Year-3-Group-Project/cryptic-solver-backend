@@ -13,6 +13,7 @@ from cryptic_solver.async_calls import *
 import requests
 import re
 import html
+import asyncio
 from bs4 import BeautifulSoup
 
 #from cryptic_solver.models import Puzzle
@@ -22,11 +23,8 @@ allowed_crossword_prefixes = [
 
 
 # Sequentially awaits multiple started tasks.
-async def gather_tasks(*tasks: Awaitable) -> List:
-    results = []
-    for task in tasks:
-        results.append(await task)
-    return results
+def gather_tasks(*tasks: Awaitable) -> List:
+    return asyncio.gather(*tasks)
 
 # Combines solver solutions as a list of lists of solutions.
 def combine_solver_solutions(solutions: List[List]) -> List:
@@ -222,7 +220,7 @@ async def solve_with_dict(request):
         word_length = data["word_length"]
         pattern = data["pattern"]
         letter_pattern = data["letter_pattern"]
-        
+
         # Gather solutions from Unlikely solver only based on pattern
         tasks = [get_and_format_unlikely(clue, pattern, letter_pattern=letter_pattern)]
 
