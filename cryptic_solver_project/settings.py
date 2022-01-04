@@ -110,11 +110,11 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 209715200
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'de63asegqs6974',
-        'HOST' : 'ec2-176-34-116-203.eu-west-1.compute.amazonaws.com',
+        'NAME': 'd14m2t8u36ej7o',
+        'HOST' : 'ec2-18-202-156-92.eu-west-1.compute.amazonaws.com',
         'PORT' : 5432,
-        'USER' : 'nmubaidzllyauu',
-        'PASSWORD' : 'b63acad06276ddeb91093054f35b71a45830dd5ae312bf26befd9f4693ca9340',
+        'USER' : 'pefnxuxnipylob',
+        'PASSWORD' : 'bdcbd400ef0202ada63db6a0f4a27ea9e46eae99e54bde6e0b812e92625e23ac',
     }
 }
 
