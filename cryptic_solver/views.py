@@ -20,7 +20,7 @@ allowed_crossword_prefixes = [
 
 
 def option_response():
-    response = JsonResponse({})
+    response = HttpResponse()
     response.status_code = 204
     response["Connection"] = "keep-alive"
     response["Access-Control-Allow-Origin"] = "*"
