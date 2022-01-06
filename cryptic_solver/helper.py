@@ -164,7 +164,8 @@ def parse_unlikely_with_explanations(unlikely_json):
         if candidate["confidence"] >= minimum_confidence:
             answer = {"answer" : candidate["candidate"], \
                         "confidence" : candidate["confidence"], \
-                        "explanation" : candidate["explanation"]}
+                        "explanation" : candidate["explanation"], \
+                        "source": "unlikely"}
             answers.append(answer)
 
     return answers
@@ -211,12 +212,13 @@ def format_haskell_answers(response):
         sol["answer"] = solution[0]
         sol["confidence"] = 1.0 / len(responses)
         sol["explanation"] = solution[1]
+        sol["source"] = "morse"
 
         solutions.append(sol)
 
     return solutions
 
-def combine_solutions(hs_solutions, unlikely_solutions):
+def combine_solutions(unlikely_solutions, hs_solutions):
     """
     Takes the two lists of solutions produced from the Haskell solver
     and the Unlikely solver and adds all not duplicated Haskell solutions to
@@ -232,17 +234,13 @@ def combine_solutions(hs_solutions, unlikely_solutions):
 
     the union of the Unlikely solutions with the Haskell solutions
     """
-    for hs_sol in hs_solutions:
-        is_duplicate = False
-        for uai_sol in unlikely_solutions:
-            if hs_sol["answer"].lower() == uai_sol["answer"].lower():
-                is_duplicate = True
-                break
+    hs_answers = set(map(lambda s: s["answer"].lower(), hs_solutions))
+    print(hs_solutions)
+    for unlikely_sol in unlikely_solutions:
+        if not unlikely_sol["answer"].lower() in hs_answers:
+            hs_solutions.append(unlikely_sol)
 
-        if not is_duplicate:
-            unlikely_solutions.append(hs_sol)
-
-    return unlikely_solutions
+    return hs_solutions
 
 def filter_by_pattern(solutions, pattern):
     # Given a list of solutions, will filter them by whether they match a given pattern
