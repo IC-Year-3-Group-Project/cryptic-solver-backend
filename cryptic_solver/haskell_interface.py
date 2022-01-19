@@ -4,6 +4,7 @@ import urllib.parse
 from requests.models import Response
 from cryptic_solver_project import settings
 from functools import reduce
+import unicodedata as ud
 import asyncio
 import aiohttp
 
@@ -68,6 +69,7 @@ async def hs_solve_with_cands(clue, word_length, candidates, explain=True):
 
 async def call_haskell(mode, clue, word_length, explain=False, answers=""):
     extra = "AndExplain" if explain else ""
+    clue = ud.normalize('NFKD', clue)
     clue = urllib.parse.quote(clue, safe='')
 
     fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answers}"
@@ -85,6 +87,7 @@ async def call_haskell(mode, clue, word_length, explain=False, answers=""):
 
 def call_haskell_no_async(mode, clue, word_length, explain=False, answers=""):
     extra = "AndExplain" if explain else ""
+    clue = ud.normalize('NFKD', clue)
     clue = urllib.parse.quote(clue, safe='')
 
     fullURL = f"{haskellURL}/solve{mode}{extra}/{clue}/{word_length}/{answers}"
